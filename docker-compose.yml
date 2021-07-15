@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: skillshare_db
+    image: postgres:13.1
+    restart: always
+    environment:
+      - POSTGRES_DB=skillshare_db
+      - POSTGRES_USER=skilladmin
+      - POSTGRES_PASSWORD=skillshare
+    ports:
+      - 5432:5432
+    volumes:
+      - './pg/data:/var/lib/postgresql/data'
+      - './pg/init:/docker-entrypoint-initdb.d'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
