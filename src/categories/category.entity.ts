@@ -14,7 +14,10 @@ export class Category {
   id: number;
   @Column({ name: 'name', length: 400, unique: true })
   name: string;
-  @OneToMany(() => Skill, (skill) => skill.category, { nullable: true })
+  @OneToMany(() => Skill, (skill) => skill.category, {
+    nullable: true,
+    cascade: true,
+  })
   skills: Skill[];
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

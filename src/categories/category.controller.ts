@@ -74,8 +74,16 @@ export class CategoryController {
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id) {
-    const result = await this.categoryService.deleteCategory(id);
-    if (result?.affected !== 1) throw new NotFoundException();
-    else return true;
+    try {
+      const result = await this.categoryService.deleteCategory(id);
+      if (result?.affected !== 1)
+        throw new HttpException(`Category with id ${id} not found!`, 404);
+      else return true;
+    } catch (err) {
+      throw new HttpException(
+        err ? err.response : `Failed to delete category of id: ${id}`,
+        404,
+      );
+    }
   }
 }
