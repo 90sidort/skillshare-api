@@ -57,8 +57,14 @@ export class SkillsController {
   }
   @Get()
   async getSkills(@Query() query) {
+    const { limit, currentPage, name, categoryId } = query;
+    const search = { name, categoryId };
+    const paginator = { limit, total: true, currentPage };
     try {
-      return await this.skillsService.searchSkills(query);
+      return await this.skillsService.getFilteredSkillsPaginated(
+        paginator,
+        search,
+      );
     } catch (err) {
       throw new HttpException(`Failed to fetch skills`, 400);
     }

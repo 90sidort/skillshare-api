@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateCategoryDto } from 'src/categories/category.dto';
-import { Category } from 'src/categories/category.entity';
 import { OfferStatusEnum } from 'src/offer/offer.entity';
 import { paginate, PaginateOptions } from 'src/pagination/paginator';
 import { DeleteResult, Repository } from 'typeorm';
-import { CreateSkillDto, skillSearchQuery } from './skill.dto';
+import { skillSearchQuery } from './skill.dto';
 import { Skill } from './skill.entity';
 
 @Injectable()
@@ -33,23 +31,24 @@ export class SkillsService {
         }),
       );
   }
-  public async getSkillsWithCountOfOffersPaginated(
+  public async searchSkills(search: skillSearchQuery) {
+    const { categoryId, name } = search;
+    const base = this.getSkillsBaseQuery();
+    if (categoryId) base.andWhere('s.categoryId = :categoryId', { categoryId });
+    if (name) base.andWhere('s.name like :name', { name: `%${name}%` });
+    return base;
+  }
+  public async getFilteredSkillsPaginated(
     paginateOptions: PaginateOptions,
+    search: skillSearchQuery,
   ) {
-    return await paginate(await this.getSkillsBaseQuery(), paginateOptions);
+    return await paginate(await this.searchSkills(search), paginateOptions);
   }
   public async getSkill(id: number): Promise<Skill | undefined> {
     const query = this.getSkillsWithCountOfOffers().andWhere('s.id = :id', {
       id,
     });
     return await query.getOne();
-  }
-  public async searchSkills(search: skillSearchQuery) {
-    const { categoryId, name } = search;
-    const base = this.getSkillsBaseQuery();
-    if (categoryId) base.andWhere('s.categoryId = :categoryId', { categoryId });
-    if (name) base.andWhere('s.name = :name', { name });
-    return await base.getMany();
   }
   public async deleteSkill(id: number): Promise<DeleteResult> {
     return await this.skillsRepository

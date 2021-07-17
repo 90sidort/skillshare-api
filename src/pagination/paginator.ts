@@ -3,14 +3,14 @@ import { SelectQueryBuilder } from 'typeorm';
 export interface PaginateOptions {
   limit: number;
   currentPage: number;
-  total?: boolean;
+  total: boolean;
 }
 
 export interface PaginationResult<T> {
   first: number;
   last: number;
   limit: number;
-  total?: number;
+  total: number;
   data: T[];
 }
 
@@ -19,6 +19,7 @@ export async function paginate<T>(
   options: PaginateOptions = {
     limit: 10,
     currentPage: 1,
+    total: true,
   },
 ): Promise<PaginationResult<T>> {
   const offset = (options.currentPage - 1) * options.limit;
