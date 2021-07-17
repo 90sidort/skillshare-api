@@ -112,48 +112,26 @@ export class OfferController {
       throw new HttpException(`Failed to update offer with id: ${id}`, 400);
     }
   }
-
-  // @Delete(':id')
-  // @HttpCode(204)
-  // async deleteOffer(@Param('id', ParseIntPipe) id, @CurrentUser() user: User) {
-  //   const offer = await this.repository.findOne(id);
-  //   if (!offer)
-  //     throw new NotFoundException(null, `Offer with id ${id} not found.`);
-  //   if (user.id !== offer.ownerId)
-  //     throw new ForbiddenException(
-  //       null,
-  //       `You cannot delete offer that is not yours!`,
-  //     );
-  //   await this.repository.remove(offer);
-  //   return true;
-  // }
-
-  // @Post('/subscribe')
-  // async subscribe(@Body() input) {
-  //   const offer = await this.repository.findOne(input.oid, {
-  //     relations: ['participants'],
-  //   });
-  //   const user = await this.userRepository.findOne(input.uid, {
-  //     relations: ['participates'],
-  //   });
-  //   user.participates.push(offer);
-  //   await this.userRepository.save(user);
-  //   return offer;
-  // }
-  // @Post('/unsubscribe')
-  // async unsubscribe(@Body() input) {
-  //   const user = await this.userRepository.findOne(input.uid, {
-  //     relations: ['participates'],
-  //   });
-  //   user.participates = user.participates.filter(
-  //     (offer) => offer.id !== input.oid,
-  //   );
-  //   await this.userRepository.save(user);
-  //   return user;
-  //   // await this.userRepository
-  //   //   .createQueryBuilder('u')
-  //   //   .update()
-  //   //   .set({ about: 'testujemy' })
-  //   //   .execute();
-  // }
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(@Param('id') id) {
+    try {
+      const offer = await this.repository.findOne(id, {
+        relations: ['applicants', 'participants'],
+      });
+      if (!offer)
+        throw new HttpException(`Offer with id ${id} not found!`, 404);
+      if (offer.applicants.length > 0 || offer.participants.length > 0)
+        throw new HttpException(`Offer with id ${id} has active members!`, 404);
+      const result = await this.offersService.deleteOffer(id);
+      if (result?.affected !== 1)
+        throw new HttpException(`Skill with id ${id} not found!`, 404);
+      else return true;
+    } catch (err) {
+      throw new HttpException(
+        err ? err.response : `Failed to delete skill with id ${id}`,
+        404,
+      );
+    }
+  }
 }

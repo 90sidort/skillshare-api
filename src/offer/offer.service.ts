@@ -59,4 +59,11 @@ export class OfferService {
       ])
       .getOne();
   }
+  public async deleteOffer(id: number): Promise<DeleteResult> {
+    return await this.offerRepository
+      .createQueryBuilder('o')
+      .delete()
+      .where('id = :id', { id })
+      .execute();
+  }
 }
