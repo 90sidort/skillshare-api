@@ -1,5 +1,4 @@
 import { Length } from 'class-validator';
-import { User } from 'src/user/user.entity';
 
 export class CreateOfferDto {
   @Length(3, 300, {
@@ -11,7 +10,12 @@ export class CreateOfferDto {
       'Description cannot be shorter than 3 characters and longer than 300!',
   })
   description: string;
-  skill: number;
-  owner: User;
-  participants?: User[] = [];
+  skillId: number;
+  ownerId: number;
+}
+
+export class offerSearchQuery {
+  title?: string;
+  skillId?: number;
+  ownerId?: number;
 }

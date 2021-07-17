@@ -31,18 +31,19 @@ export class SkillsService {
         }),
       );
   }
-  public async searchSkills(search: skillSearchQuery) {
+  public searchSkills(search: skillSearchQuery) {
     const { categoryId, name } = search;
     const base = this.getSkillsBaseQuery();
     if (categoryId) base.andWhere('s.categoryId = :categoryId', { categoryId });
-    if (name) base.andWhere('s.name like :name', { name: `%${name}%` });
+    if (name)
+      base.andWhere('LOWER(s.name) like LOWER(:name)', { name: `%${name}%` });
     return base;
   }
   public async getFilteredSkillsPaginated(
     paginateOptions: PaginateOptions,
     search: skillSearchQuery,
   ) {
-    return await paginate(await this.searchSkills(search), paginateOptions);
+    return await paginate(this.searchSkills(search), paginateOptions);
   }
   public async getSkill(id: number): Promise<Skill | undefined> {
     const query = this.getSkillsWithCountOfOffers().andWhere('s.id = :id', {

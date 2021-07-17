@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import { Skill } from 'src/skills/skill.entity';
 import { User } from 'src/user/user.entity';
 import {
@@ -20,40 +19,42 @@ export enum OfferStatusEnum {
 @Entity()
 export class Offer {
   @PrimaryGeneratedColumn()
-  @Expose()
   id: number;
   @Column({ name: 'title', length: 300 })
-  @Expose()
   title: string;
   @Column({ name: 'description', length: 2000 })
-  @Expose()
   description: string;
   @ManyToOne(() => Skill, (skill) => skill.offers, { nullable: false })
-  @Expose()
   skill: Skill;
   @ManyToOne(() => User, (user) => user.offers, { nullable: false })
-  @Expose()
   owner: User;
   @ManyToMany(() => User, (user) => user.participates, {
     nullable: true,
     cascade: true,
   })
   @JoinTable()
-  @Expose()
   participants: User[];
+  @ManyToMany(() => User, (user) => user.applied, {
+    nullable: true,
+    cascade: true,
+  })
+  @JoinTable()
+  applicants: User[];
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
-
+  @Column({ default: true })
+  available: boolean;
   @Column()
-  @Expose()
   ownerId: number;
-
+  @Column()
+  skillId: number;
   @Column('enum', {
     enum: OfferStatusEnum,
     default: OfferStatusEnum.Pending,
   })
-  @Expose()
   status: OfferStatusEnum;
+  applicantCount: number;
+  participantCount: number;
 }

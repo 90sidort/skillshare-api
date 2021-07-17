@@ -57,7 +57,7 @@ export class SkillsController {
   }
   @Get()
   async getSkills(@Query() query) {
-    const { limit, currentPage, name, categoryId } = query;
+    const { limit = 10, currentPage = 1, name, categoryId } = query;
     const search = { name, categoryId };
     const paginator = { limit, total: true, currentPage };
     try {

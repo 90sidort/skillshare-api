@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import { Offer } from 'src/offer/offer.entity';
 import { Profile } from 'src/profile/profile.entity';
 import {
@@ -16,10 +15,8 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  @Expose()
   id: number;
   @Column({ name: 'username', length: 300, unique: true })
-  @Expose()
   username: string;
   @Column({ name: 'name', length: 300 })
   name: string;
@@ -30,19 +27,18 @@ export class User {
   @Column({ name: 'email', length: 300, unique: true })
   email: string;
   @Column({ name: 'about', length: 2000 })
-  @Expose()
   about: string;
   @OneToMany(() => Offer, (offer) => offer.owner, { nullable: true })
-  @Expose()
   offers: Offer[];
   @ManyToMany(() => Offer, (offer) => offer.participants, {
     nullable: true,
-    // eager: true,
   })
-  @Expose()
   participates: Offer[];
+  @ManyToMany(() => Offer, (offer) => offer.applicants, {
+    nullable: true,
+  })
+  applied: Offer[];
   @OneToOne(() => Profile)
-  @Expose()
   @JoinColumn()
   profile: Profile;
   @CreateDateColumn({ type: 'timestamp' })
