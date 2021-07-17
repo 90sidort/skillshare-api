@@ -11,6 +11,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   SerializeOptions,
@@ -22,7 +23,7 @@ import { Repository } from 'typeorm';
 
 import { Offer } from 'src/offer/offer.entity';
 import { User } from 'src/user/user.entity';
-import { CreateOfferDto } from './offer.dto';
+import { CreateOfferDto, UpdateCreateDto } from './offer.dto';
 import { CurrentUser } from 'src/auth/currentUser.decorator';
 import { Skill } from 'src/skills/skill.entity';
 // import { AuthGuard } from '@nestjs/passport';
@@ -79,8 +80,36 @@ export class OfferController {
     try {
       return await this.offersService.getSingleOffer(id);
     } catch (err) {
-      console.log(err);
-      throw new HttpException(`Failed to fetch offer`, 400);
+      throw new HttpException(`Failed to fetch offer with id: ${id}`, 400);
+    }
+  }
+  @Patch(':id')
+  async updateOffer(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() input: UpdateCreateDto,
+  ) {
+    try {
+      const { title, description, skillId, available } = input;
+      let skill = undefined;
+      const offer = await this.repository.findOne(id);
+      if (!title && !description && !skillId && available === undefined)
+        return offer;
+      if (!offer)
+        throw new HttpException(`Failed to fetch offer with id ${id}`, 404);
+      if (skillId) skill = this.skillRepository.findOne(skillId);
+      if (skillId && skill === undefined)
+        throw new HttpException(
+          `Failed to fetch skill with id ${skillId}`,
+          404,
+        );
+      if (skillId && skill) offer.skill = skill;
+      if (title) offer.title = title;
+      if (description) offer.description = description;
+      if (available !== undefined) offer.available = available;
+      await this.repository.save(offer);
+      return offer;
+    } catch (err) {
+      throw new HttpException(`Failed to update offer with id: ${id}`, 400);
     }
   }
 

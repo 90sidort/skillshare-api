@@ -1,3 +1,4 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { Length } from 'class-validator';
 
 export class CreateOfferDto {
@@ -12,6 +13,10 @@ export class CreateOfferDto {
   description: string;
   skillId: number;
   ownerId: number;
+}
+
+export class UpdateCreateDto extends PartialType(CreateOfferDto) {
+  available?: boolean;
 }
 
 export class offerSearchQuery {
