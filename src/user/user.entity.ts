@@ -1,13 +1,10 @@
 import { Offer } from 'src/offer/offer.entity';
-import { Profile } from 'src/profile/profile.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToMany,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -38,11 +35,11 @@ export class User {
     nullable: true,
   })
   applied: Offer[];
-  @OneToOne(() => Profile)
-  @JoinColumn()
-  profile: Profile;
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+  appliedCount: number;
+  participatesCount: number;
+  offeredCounts: number;
 }

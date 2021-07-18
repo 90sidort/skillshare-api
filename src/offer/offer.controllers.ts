@@ -24,10 +24,10 @@ import { Repository } from 'typeorm';
 import { Offer } from 'src/offer/offer.entity';
 import { User } from 'src/user/user.entity';
 import { CreateOfferDto, UpdateCreateDto } from './offer.dto';
-import { CurrentUser } from 'src/auth/currentUser.decorator';
+// import { CurrentUser } from 'src/auth/currentUser.decorator';
 import { Skill } from 'src/skills/skill.entity';
 // import { AuthGuard } from '@nestjs/passport';
-import { AuthGuardJwt } from 'src/auth/authguard.jwt';
+// import { AuthGuardJwt } from 'src/auth/authguard.jwt';
 import { OfferService } from './offer.service';
 
 @Controller('/offer')
