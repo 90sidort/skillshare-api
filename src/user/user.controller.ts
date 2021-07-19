@@ -12,12 +12,15 @@ import {
   Post,
   Query,
   SerializeOptions,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignupDto, UpdateUserDto } from './user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { CurrentUser } from 'src/auth/currentUser.decorator';
 
 @Controller('users')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -28,7 +31,16 @@ export class UsersController {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  @Post()
+  @Post('signin')
+  @UseGuards(AuthGuard('local'))
+  async signin(@CurrentUser() user: User) {
+    return {
+      userId: user.id,
+      token: this.userService.getTokenForUser(user),
+    };
+  }
+
+  @Post('signup')
   async create(@Body() input: SignupDto) {
     try {
       if (input.password !== input.retype)
