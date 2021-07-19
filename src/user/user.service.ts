@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { paginate, PaginateOptions } from 'src/pagination/paginator';
 import { DeleteResult, Repository } from 'typeorm';
+import { userSearchQuery } from './user.dto';
 import { User } from './user.entity';
 
 @Injectable()
@@ -22,14 +23,43 @@ export class UserService {
       sub: user.id,
     });
   }
+  public async comparePasswords(passwordSaved: string, passwordGiven: string) {
+    return await bcrypt.compare(passwordGiven, passwordSaved);
+  }
   public async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10);
   }
-  public getUsersWithCounts() {
+  private getUsersWithCounts() {
     return this.getUserBaseQuery()
       .loadRelationCountAndMap('u.appliedCount', 'u.applied')
       .loadRelationCountAndMap('u.offeredCounts', 'u.offers')
       .loadRelationCountAndMap('u.participatesCount', 'u.participates');
+  }
+  private searchUsersWithCount(search: userSearchQuery) {
+    const { username, email } = search;
+    const base = this.getUsersWithCounts();
+    if (username)
+      base.andWhere('LOWER(u.username) like LOWER(:username)', {
+        username: `%${username}%`,
+      });
+    if (email)
+      base.andWhere('LOWER(u.email) like LOWER(:email)', {
+        email: `%${email}%`,
+      });
+    return base;
+  }
+  public async getFilteredUsersPaginated(
+    paginateOptions: PaginateOptions,
+    search: userSearchQuery,
+  ) {
+    return await paginate(this.searchUsersWithCount(search), paginateOptions);
+  }
+  public async getUserById(id: number) {
+    return await this.getUserBaseQuery()
+      .andWhere('u.id = :id', {
+        id,
+      })
+      .getOne();
   }
   public async getUserWithCountsAndRelations(id: number) {
     return await this.getUsersWithCounts()
@@ -49,5 +79,12 @@ export class UserService {
         'applied.title',
       ])
       .getOne();
+  }
+  public async deleteUser(id: number): Promise<DeleteResult> {
+    return await this.userRepository
+      .createQueryBuilder('u')
+      .delete()
+      .where('id = :id', { id })
+      .execute();
   }
 }

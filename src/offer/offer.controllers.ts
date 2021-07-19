@@ -125,11 +125,11 @@ export class OfferController {
         throw new HttpException(`Offer with id ${id} has active members!`, 404);
       const result = await this.offersService.deleteOffer(id);
       if (result?.affected !== 1)
-        throw new HttpException(`Skill with id ${id} not found!`, 404);
+        throw new HttpException(`Offer with id ${id} not found!`, 404);
       else return true;
     } catch (err) {
       throw new HttpException(
-        err ? err.response : `Failed to delete skill with id ${id}`,
+        err ? err.response : `Failed to delete offer with id ${id}`,
         404,
       );
     }

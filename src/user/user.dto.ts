@@ -1,4 +1,10 @@
-import { IsEmail, Length } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { IsEmail, Length, IsOptional } from 'class-validator';
+
+export class userSearchQuery {
+  username?: string;
+  email?: string;
+}
 
 export class SignupDto {
   @Length(3, 300, {
@@ -30,4 +36,19 @@ export class SignupDto {
     message: 'About cannot be shorter than 3 characters and longer than 2000!',
   })
   about: string;
+}
+
+export class UpdateUserDto extends PartialType(SignupDto) {
+  @IsOptional()
+  @Length(3, 300, {
+    message:
+      'Password cannot be shorter than 3 characters and longer than 100!',
+  })
+  newPassword?: string;
+  @IsOptional()
+  @Length(3, 300, {
+    message:
+      'Password cannot be shorter than 3 characters and longer than 100!',
+  })
+  retypeNewPassword?: string;
 }
