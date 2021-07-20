@@ -19,7 +19,6 @@ import { UserModule } from './user/user.module';
     TypeOrmModule.forRootAsync({
       useFactory: ormConfig,
     }),
-    // AuthModule,
     SkillsModule,
     OfferModule,
     CategoryModule,

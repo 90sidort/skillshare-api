@@ -46,6 +46,8 @@ export class Offer {
   updatedAt: Date;
   @Column({ default: true })
   available: boolean;
+  @Column({ default: 3 })
+  limit: number;
   @Column()
   ownerId: number;
   @Column()

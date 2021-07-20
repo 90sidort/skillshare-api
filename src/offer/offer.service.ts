@@ -59,6 +59,18 @@ export class OfferService {
       ])
       .getOne();
   }
+  public async getApplicantsByOwner(ownerId: number) {
+    return await this.searchOffers({ ownerId: ownerId })
+      .leftJoin('o.applicants', 'applicants')
+      .select([
+        'o.id',
+        'o.title',
+        'o.description',
+        'applicants.id',
+        'applicants.username',
+      ])
+      .getMany();
+  }
   public async deleteOffer(id: number): Promise<DeleteResult> {
     return await this.offerRepository
       .createQueryBuilder('o')
