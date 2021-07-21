@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from './authorization/role.enum';
 
 @Entity()
 export class User {
@@ -39,6 +40,8 @@ export class User {
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+  @Column('enum', { enum: [Role.Admin, Role.User], default: [Role.User] })
+  roles: Role[];
   appliedCount: number;
   participatesCount: number;
   offeredCounts: number;

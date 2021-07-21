@@ -5,12 +5,12 @@ import {
   Get,
   HttpCode,
   HttpException,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   SerializeOptions,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,6 +18,9 @@ import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './category.dto';
+import { AuthGuardJwt } from 'src/user/authentication/guard';
+import { CurrentUser } from 'src/auth/currentUser.decorator';
+import { User } from 'src/user/user.entity';
 
 @Controller('/category')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -29,7 +32,11 @@ export class CategoryController {
   ) {}
 
   @Post()
-  async addCategory(@Body() input: CreateCategoryDto) {
+  @UseGuards(AuthGuardJwt)
+  async addCategory(
+    @Body() input: CreateCategoryDto,
+    @CurrentUser() user: User
+  ) {
     try {
       const category = new Category();
       category.name = input.name;
@@ -40,6 +47,7 @@ export class CategoryController {
     }
   }
   @Get()
+  @UseGuards(AuthGuardJwt)
   async getCategories() {
     try {
       return await this.categoryService.getCategoriesWithCountOfSkills();
@@ -48,6 +56,7 @@ export class CategoryController {
     }
   }
   @Get(':id')
+  @UseGuards(AuthGuardJwt)
   async getCategory(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.categoryService.getCategory(id);

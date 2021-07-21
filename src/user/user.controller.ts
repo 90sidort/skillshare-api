@@ -14,13 +14,16 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignupDto, UpdateUserDto } from './user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { CurrentUser } from 'src/auth/currentUser.decorator';
+import { AuthGuardJwt, AuthGuardLocal } from './authentication/guard';
+import { Roles } from './authorization/roles.decorator';
+import { Role } from './authorization/role.enum';
+import { AdminGuard } from './authorization/roles.guard';
 
 @Controller('users')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -31,8 +34,8 @@ export class UsersController {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  @UseGuards(AuthGuardLocal)
   @Post('signin')
-  @UseGuards(AuthGuard('local'))
   async signin(@CurrentUser() user: User) {
     return {
       userId: user.id,
@@ -67,8 +70,9 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Get()
-  async getSkills(@Query() query) {
+  async getUsers(@Query() query) {
     const { limit = 10, currentPage = 1, username, email } = query;
     const search = { username, email };
     const paginator = { limit, total: true, currentPage };
