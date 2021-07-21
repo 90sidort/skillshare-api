@@ -1,4 +1,4 @@
-import { Skill } from 'src/skills/skill.entity';
+import { Skill } from './../skills/skill.entity';
 import {
   Column,
   CreateDateColumn,

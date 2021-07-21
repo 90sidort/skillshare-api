@@ -18,9 +18,8 @@ import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './category.dto';
-import { AuthGuardJwt } from 'src/user/authentication/guard';
-import { CurrentUser } from 'src/auth/currentUser.decorator';
-import { User } from 'src/user/user.entity';
+import { AuthGuardJwt } from './../user/authentication/guard';
+import { AdminGuard } from './../user/authorization/roles.guard';
 
 @Controller('/category')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -31,12 +30,9 @@ export class CategoryController {
     private readonly categoryService: CategoryService,
   ) {}
 
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Post()
-  @UseGuards(AuthGuardJwt)
-  async addCategory(
-    @Body() input: CreateCategoryDto,
-    @CurrentUser() user: User
-  ) {
+  async addCategory(@Body() input: CreateCategoryDto) {
     try {
       const category = new Category();
       category.name = input.name;
@@ -46,8 +42,8 @@ export class CategoryController {
       throw new HttpException('Failed to create category', 400);
     }
   }
-  @Get()
   @UseGuards(AuthGuardJwt)
+  @Get()
   async getCategories() {
     try {
       return await this.categoryService.getCategoriesWithCountOfSkills();
@@ -55,8 +51,8 @@ export class CategoryController {
       throw new HttpException('Failed to get categories', 404);
     }
   }
-  @Get(':id')
   @UseGuards(AuthGuardJwt)
+  @Get(':id')
   async getCategory(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.categoryService.getCategory(id);
@@ -64,6 +60,7 @@ export class CategoryController {
       throw new HttpException(`Failed to get category of id: ${id}`, 404);
     }
   }
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Patch(':id')
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
@@ -72,14 +69,18 @@ export class CategoryController {
     try {
       const category = await this.repository.findOne(id);
       if (!category)
-        throw new HttpException(`Failed to find category of id ${id}`, 403);
+        throw new HttpException(`Failed to find category of id ${id}`, 404);
       category.name = input.name;
       await this.repository.save(category);
       return category;
     } catch (err) {
-      throw new HttpException(`Failed to update category of id: ${id}`, 404);
+      throw new HttpException(
+        err.response.message || `Failed to update category of id: ${id}`,
+        404,
+      );
     }
   }
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id) {
@@ -90,7 +91,7 @@ export class CategoryController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err ? err.response : `Failed to delete category of id: ${id}`,
+        err.response.message || `Failed to delete category of id: ${id}`,
         404,
       );
     }

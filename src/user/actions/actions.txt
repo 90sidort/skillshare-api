@@ -1,6 +1,0 @@
-1. Apply for offer
-2. Cancel application
-3. Accept application
-4. Reject application
-5. Cancel particitipation
-6. Remove participant

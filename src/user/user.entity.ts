@@ -1,4 +1,3 @@
-import { Offer } from 'src/offer/offer.entity';
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { Role } from './authorization/role.enum';
+import { Offer } from './../offer/offer.entity';
 
 @Entity()
 export class User {

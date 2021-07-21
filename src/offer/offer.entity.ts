@@ -1,5 +1,3 @@
-import { Skill } from 'src/skills/skill.entity';
-import { User } from 'src/user/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -10,6 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Skill } from './../skills/skill.entity';
+import { User } from './../user/user.entity';
 
 export enum OfferStatusEnum {
   Accepted = 1,

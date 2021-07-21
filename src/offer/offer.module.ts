@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Offer } from './offer.entity';
 import { OfferController } from './offer.controllers';
-import { User } from 'src/user/user.entity';
-import { Skill } from 'src/skills/skill.entity';
+import { User } from './../user/user.entity';
+import { Skill } from './../skills/skill.entity';
 import { OfferService } from './offer.service';
 
 @Module({

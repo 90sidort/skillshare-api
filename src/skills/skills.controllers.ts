@@ -4,37 +4,35 @@ import {
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
-  ValidationPipe,
+  UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Offer } from 'src/offer/offer.entity';
-import { CreateSkillDto, skillSearchQuery, UpdateSkillDto } from './skill.dto';
+import { CreateSkillDto, UpdateSkillDto } from './skill.dto';
 import { Skill } from './skill.entity';
-// import { SkillsService } from './skills.service';
-import { Category } from 'src/categories/category.entity';
-import { HttpException } from '@nestjs/common';
+import { Category } from './../categories/category.entity';
 import { SkillsService } from './skills.service';
+import { AuthGuardJwt } from './../user/authentication/guard';
+import { AdminGuard } from './../user/authorization/roles.guard';
 
 @Controller('/skills')
 export class SkillsController {
   constructor(
     @InjectRepository(Skill)
     private readonly repository: Repository<Skill>,
-    @InjectRepository(Offer)
-    private readonly offerRepository: Repository<Offer>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly skillsService: SkillsService,
   ) {}
 
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Post()
   async addSkill(@Body() input: CreateSkillDto) {
     try {
@@ -50,11 +48,13 @@ export class SkillsController {
       return skill;
     } catch (err) {
       throw new HttpException(
-        err.response ? err.response : `Failed to create skill`,
+        err.response.message || `Failed to create skill`,
         400,
       );
     }
   }
+
+  @UseGuards(AuthGuardJwt)
   @Get()
   async getSkills(@Query() query) {
     const { limit = 10, currentPage = 1, name, categoryId } = query;
@@ -69,10 +69,14 @@ export class SkillsController {
       throw new HttpException(`Failed to fetch skills`, 400);
     }
   }
+
+  @UseGuards(AuthGuardJwt)
   @Get(':id')
   async getSkill(@Param('id', ParseIntPipe) id: number) {
     return await this.skillsService.getSkill(id);
   }
+
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Patch(':id')
   async updateSkill(
     @Param('id', ParseIntPipe) id: number,
@@ -105,6 +109,8 @@ export class SkillsController {
       );
     }
   }
+
+  @UseGuards(AuthGuardJwt, AdminGuard)
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id) {

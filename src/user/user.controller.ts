@@ -19,11 +19,9 @@ import { SignupDto, UpdateUserDto } from './user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserService } from './user.service';
-import { CurrentUser } from 'src/auth/currentUser.decorator';
+import { CurrentUser } from './authentication/currentUser.decorator';
 import { AuthGuardJwt, AuthGuardLocal } from './authentication/guard';
-import { Roles } from './authorization/roles.decorator';
 import { Role } from './authorization/role.enum';
-import { AdminGuard } from './authorization/roles.guard';
 
 @Controller('users')
 @SerializeOptions({ strategy: 'excludeAll' })
@@ -66,11 +64,11 @@ export class UsersController {
         token: this.userService.getTokenForUser(user),
       };
     } catch (err) {
-      throw new HttpException(`Failed to signup`, 400);
+      throw new HttpException(err.response.message || `Failed to signup`, 400);
     }
   }
 
-  @UseGuards(AuthGuardJwt, AdminGuard)
+  @UseGuards(AuthGuardJwt)
   @Get()
   async getUsers(@Query() query) {
     const { limit = 10, currentPage = 1, username, email } = query;
@@ -86,6 +84,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthGuardJwt)
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number) {
     try {
@@ -95,10 +94,12 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthGuardJwt)
   @Patch(':id')
   async updateSkill(
     @Param('id', ParseIntPipe) id: number,
     @Body() input: UpdateUserDto,
+    @CurrentUser() userReq: User,
   ) {
     const {
       name,
@@ -113,6 +114,11 @@ export class UsersController {
       const user = await this.userService.getUserById(id);
       if (!user)
         throw new HttpException(`Failed to fetch user with id ${id}`, 404);
+      if (user.id !== userReq.id && !user.roles.includes(Role.Admin))
+        throw new HttpException(
+          `Unauthorized to update user with id ${id}`,
+          403,
+        );
       if (
         !name &&
         !surname &&
@@ -146,19 +152,26 @@ export class UsersController {
       return user;
     } catch (err) {
       throw new HttpException(
-        err.response ? err.response : `Failed to update user`,
+        err.response.message || `Failed to update user`,
         400,
       );
     }
   }
+
+  @UseGuards(AuthGuardJwt)
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id) {
+  async remove(@Param('id') id, @CurrentUser() userReq: User) {
     try {
       const user = await this.userRepository.findOne(id, {
         relations: ['participates', 'applied', 'offers'],
       });
       if (!user) throw new HttpException(`User with id ${id} not found!`, 404);
+      if (user.id !== userReq.id && !user.roles.includes(Role.Admin))
+        throw new HttpException(
+          `Unauthorized to delete user with id ${id}`,
+          403,
+        );
       if (
         user.participates.length > 0 ||
         user.applied.length > 0 ||
@@ -171,7 +184,7 @@ export class UsersController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err ? err.response : `Failed to delete User with id ${id}`,
+        err.response.message || `Failed to delete User with id ${id}`,
         404,
       );
     }

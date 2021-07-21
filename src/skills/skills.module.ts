@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Category } from 'src/categories/category.entity';
-import { Offer } from 'src/offer/offer.entity';
+
+import { Category } from './../categories/category.entity';
+import { Offer } from './../offer/offer.entity';
 import { Skill } from './skill.entity';
 import { SkillsController } from './skills.controllers';
 import { SkillsService } from './skills.service';

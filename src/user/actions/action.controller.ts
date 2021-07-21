@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { UserService } from '../user.service';
-import { Offer } from 'src/offer/offer.entity';
-import { User } from '../user.entity';
-import { OfferService } from 'src/offer/offer.service';
+import { Offer } from './../../offer/offer.entity';
+import { User } from './../../user/user.entity';
+import { OfferService } from './../../offer/offer.service';
 import { AnswerApplicationDto, ApplyDto } from './action.dto';
 
 @Controller('/actions')

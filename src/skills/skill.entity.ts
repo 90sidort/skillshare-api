@@ -1,5 +1,3 @@
-import { Category } from 'src/categories/category.entity';
-import { Offer } from 'src/offer/offer.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Category } from './../categories/category.entity';
+import { Offer } from './../offer/offer.entity';
 
 @Entity('skills')
 export class Skill {

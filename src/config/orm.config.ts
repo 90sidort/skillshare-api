@@ -1,10 +1,10 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Category } from 'src/categories/category.entity';
-import { Offer } from 'src/offer/offer.entity';
-import { Profile } from 'src/profile/profile.entity';
-import { Skill } from 'src/skills/skill.entity';
-import { User } from 'src/user/user.entity';
+
+import { Category } from './../categories/category.entity';
+import { Offer } from './../offer/offer.entity';
+import { Skill } from './../skills/skill.entity';
+import { User } from './../user/user.entity';
 
 export default registerAs(
   'orm.config',
@@ -15,7 +15,7 @@ export default registerAs(
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [Skill, Offer, User, Profile, Category],
+    entities: [Skill, Offer, User, Category],
     synchronize: true,
   }),
 );

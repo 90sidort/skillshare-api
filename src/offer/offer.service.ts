@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Offer, OfferStatusEnum } from 'src/offer/offer.entity';
-import { paginate, PaginateOptions } from 'src/pagination/paginator';
 import { DeleteResult, Repository } from 'typeorm';
+
+import { Offer } from './../offer/offer.entity';
+import { paginate, PaginateOptions } from './../pagination/paginator';
 import { offerSearchQuery } from './offer.dto';
 
 @Injectable()
