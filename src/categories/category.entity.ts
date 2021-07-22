@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Category {
@@ -20,8 +21,10 @@ export class Category {
   })
   skills: Skill[];
   @CreateDateColumn({ type: 'timestamp' })
+  @Exclude()
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
+  @Exclude()
   updatedAt: Date;
   skillCount: number;
 }

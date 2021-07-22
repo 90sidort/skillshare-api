@@ -6,6 +6,11 @@ export class userSearchQuery {
   email?: string;
 }
 
+export class userSignin {
+  username: string;
+  password: string;
+}
+
 export class SignupDto {
   @Length(3, 300, {
     message:

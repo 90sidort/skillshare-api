@@ -10,11 +10,11 @@ export class CreateOfferDto {
     message:
       'Description cannot be shorter than 3 characters and longer than 300!',
   })
+  description: string;
   @IsInt({ message: 'Limit must be a number' })
   @Min(1, { message: 'Limit cannot be less than 1' })
   @Max(10, { message: 'Limit cannot be greater than 10' })
   limit?: number;
-  description: string;
   skillId: number;
   ownerId: number;
 }

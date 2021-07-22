@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -11,6 +12,7 @@ import {
   Post,
   SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,7 +24,6 @@ import { AuthGuardJwt } from './../user/authentication/guard';
 import { AdminGuard } from './../user/authorization/roles.guard';
 
 @Controller('/category')
-@SerializeOptions({ strategy: 'excludeAll' })
 export class CategoryController {
   constructor(
     @InjectRepository(Category)
@@ -32,6 +33,7 @@ export class CategoryController {
 
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
   async addCategory(@Body() input: CreateCategoryDto) {
     try {
       const category = new Category();
@@ -39,11 +41,12 @@ export class CategoryController {
       await this.repository.save(category);
       return category;
     } catch (err) {
-      throw new HttpException('Failed to create category', 400);
+      throw new HttpException(err.message || 'Failed to create category', 400);
     }
   }
   @UseGuards(AuthGuardJwt)
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   async getCategories() {
     try {
       return await this.categoryService.getCategoriesWithCountOfSkills();
@@ -52,15 +55,23 @@ export class CategoryController {
     }
   }
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async getCategory(@Param('id', ParseIntPipe) id: number) {
     try {
-      return await this.categoryService.getCategory(id);
+      const category = await this.categoryService.getCategory(id);
+      if (!category)
+        throw new HttpException(`Failed to get category of id: ${id}`, 404);
+      return category;
     } catch (err) {
-      throw new HttpException(`Failed to get category of id: ${id}`, 404);
+      throw new HttpException(
+        err.message || `Failed to get category of id: ${id}`,
+        404,
+      );
     }
   }
   @UseGuards(AuthGuardJwt, AdminGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Patch(':id')
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
@@ -75,7 +86,7 @@ export class CategoryController {
       return category;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to update category of id: ${id}`,
+        err.response || `Failed to update category of id: ${id}`,
         404,
       );
     }
@@ -83,6 +94,7 @@ export class CategoryController {
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Delete(':id')
   @HttpCode(204)
+  @UseInterceptors(ClassSerializerInterceptor)
   async remove(@Param('id') id) {
     try {
       const result = await this.categoryService.deleteCategory(id);
@@ -91,7 +103,7 @@ export class CategoryController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to delete category of id: ${id}`,
+        err.response || `Failed to delete category of id: ${id}`,
         404,
       );
     }

@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -11,6 +12,7 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -38,6 +40,7 @@ export class OfferController {
 
   @UseGuards(AuthGuardJwt)
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
   async createOffer(@Body() input: CreateOfferDto) {
     try {
       const { title, description, ownerId, skillId } = input;
@@ -61,6 +64,7 @@ export class OfferController {
 
   @UseGuards(AuthGuardJwt)
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   async getOffers(@Query() query) {
     const { limit = 10, currentPage = 1, title, skillId, ownerId } = query;
     try {
@@ -78,6 +82,7 @@ export class OfferController {
 
   @UseGuards(AuthGuardJwt)
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getOffer(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.offersService.getSingleOffer(id);
@@ -88,6 +93,7 @@ export class OfferController {
 
   @UseGuards(AuthGuardJwt)
   @Patch(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async updateOffer(
     @Param('id', ParseIntPipe) id: number,
     @Body() input: UpdateCreateDto,
@@ -128,6 +134,7 @@ export class OfferController {
 
   @UseGuards(AuthGuardJwt)
   @Delete(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   async remove(@Param('id') id, @CurrentUser() user: User) {
     try {

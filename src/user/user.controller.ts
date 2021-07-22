@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -11,20 +12,19 @@ import {
   Patch,
   Post,
   Query,
-  SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SignupDto, UpdateUserDto } from './user.dto';
+import { SignupDto, UpdateUserDto, userSignin } from './user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { CurrentUser } from './authentication/currentUser.decorator';
-import { AuthGuardJwt, AuthGuardLocal } from './authentication/guard';
+import { AuthGuardJwt } from './authentication/guard';
 import { Role } from './authorization/role.enum';
 
 @Controller('users')
-@SerializeOptions({ strategy: 'excludeAll' })
 export class UsersController {
   constructor(
     private readonly userService: UserService,
@@ -32,16 +32,33 @@ export class UsersController {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  @UseGuards(AuthGuardLocal)
   @Post('signin')
-  async signin(@CurrentUser() user: User) {
-    return {
-      userId: user.id,
-      token: this.userService.getTokenForUser(user),
-    };
+  @UseInterceptors(ClassSerializerInterceptor)
+  async signin(@Body() input: userSignin) {
+    const { username, password } = input;
+    try {
+      const user = await this.userRepository.findOne({ username });
+      if (!user)
+        throw new HttpException(
+          `User with username: ${username} not found!`,
+          404,
+        );
+      if (!(await this.userService.comparePasswords(user.password, password)))
+        throw new HttpException(
+          `Provided password does not match accounts password`,
+          403,
+        );
+      return {
+        userId: user.id,
+        token: this.userService.getTokenForUser(user),
+      };
+    } catch (err) {
+      throw new HttpException(err.response.message || `Failed to signin`, 400);
+    }
   }
 
   @Post('signup')
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() input: SignupDto) {
     try {
       if (input.password !== input.retype)
@@ -70,6 +87,7 @@ export class UsersController {
 
   @UseGuards(AuthGuardJwt)
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   async getUsers(@Query() query) {
     const { limit = 10, currentPage = 1, username, email } = query;
     const search = { username, email };
@@ -86,6 +104,7 @@ export class UsersController {
 
   @UseGuards(AuthGuardJwt)
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getUser(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.userService.getUserWithCountsAndRelations(id);
@@ -96,6 +115,7 @@ export class UsersController {
 
   @UseGuards(AuthGuardJwt)
   @Patch(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async updateSkill(
     @Param('id', ParseIntPipe) id: number,
     @Body() input: UpdateUserDto,

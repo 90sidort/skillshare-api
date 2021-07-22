@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -42,8 +43,10 @@ export class Offer {
   @JoinTable()
   applicants: User[];
   @CreateDateColumn({ type: 'timestamp' })
+  @Exclude()
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
+  @Exclude()
   updatedAt: Date;
   @Column({ default: true })
   available: boolean;

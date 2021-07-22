@@ -10,6 +10,7 @@ import {
 
 import { Role } from './authorization/role.enum';
 import { Offer } from './../offer/offer.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -22,6 +23,7 @@ export class User {
   @Column({ name: 'surname', length: 300 })
   surname: string;
   @Column({ name: 'password', length: 100 })
+  @Exclude({ toPlainOnly: true })
   password: string;
   @Column({ name: 'email', length: 300, unique: true })
   email: string;
@@ -38,8 +40,10 @@ export class User {
   })
   applied: Offer[];
   @CreateDateColumn({ type: 'timestamp' })
+  @Exclude()
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
+  @Exclude()
   updatedAt: Date;
   @Column('enum', { enum: [Role.Admin, Role.User], default: [Role.User] })
   roles: Role[];

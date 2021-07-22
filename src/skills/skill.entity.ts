@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -26,8 +27,10 @@ export class Skill {
   })
   category: Category;
   @CreateDateColumn({ type: 'timestamp' })
+  @Exclude()
   createdAt: Date;
   @UpdateDateColumn({ type: 'timestamp' })
+  @Exclude()
   updatedAt: Date;
   @Column()
   categoryId: number;

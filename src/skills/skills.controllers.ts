@@ -11,6 +11,8 @@ import {
   Query,
   UseGuards,
   HttpException,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -34,6 +36,7 @@ export class SkillsController {
 
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
   async addSkill(@Body() input: CreateSkillDto) {
     try {
       const { name, catId, description } = input;
@@ -56,6 +59,7 @@ export class SkillsController {
 
   @UseGuards(AuthGuardJwt)
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   async getSkills(@Query() query) {
     const { limit = 10, currentPage = 1, name, categoryId } = query;
     const search = { name, categoryId };
@@ -72,12 +76,14 @@ export class SkillsController {
 
   @UseGuards(AuthGuardJwt)
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getSkill(@Param('id', ParseIntPipe) id: number) {
     return await this.skillsService.getSkill(id);
   }
 
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Patch(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async updateSkill(
     @Param('id', ParseIntPipe) id: number,
     @Body() input: UpdateSkillDto,
@@ -112,6 +118,7 @@ export class SkillsController {
 
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Delete(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(204)
   async remove(@Param('id') id) {
     try {
