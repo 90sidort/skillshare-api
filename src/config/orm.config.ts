@@ -5,6 +5,7 @@ import { Category } from './../categories/category.entity';
 import { Offer } from './../offer/offer.entity';
 import { Skill } from './../skills/skill.entity';
 import { User } from './../user/user.entity';
+import { Review } from './../review/review.entity';
 
 export default registerAs(
   'orm.config',
@@ -15,7 +16,7 @@ export default registerAs(
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [Skill, Offer, User, Category],
+    entities: [Skill, Offer, User, Category, Review],
     synchronize: true,
   }),
 );

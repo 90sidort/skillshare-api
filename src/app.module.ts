@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { CategoryModule } from './categories/category.module';
 import ormConfig from './config/orm.config';
 import { OfferModule } from './offer/offer.module';
+import { ReviewModule } from './review/review.module';
 import { SkillsModule } from './skills/skills.module';
 import { UserModule } from './user/user.module';
 
@@ -19,6 +20,7 @@ import { UserModule } from './user/user.module';
     TypeOrmModule.forRootAsync({
       useFactory: ormConfig,
     }),
+    ReviewModule,
     SkillsModule,
     OfferModule,
     CategoryModule,

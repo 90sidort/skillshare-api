@@ -11,6 +11,7 @@ import {
 import { Role } from './authorization/role.enum';
 import { Offer } from './../offer/offer.entity';
 import { Exclude } from 'class-transformer';
+import { Review } from './../review/review.entity';
 
 @Entity()
 export class User {
@@ -29,6 +30,10 @@ export class User {
   email: string;
   @Column({ name: 'about', length: 2000 })
   about: string;
+  @OneToMany(() => Review, (review) => review.author, { nullable: true })
+  authored: Review[];
+  @OneToMany(() => Review, (review) => review.reviewed, { nullable: true })
+  reviews: Review[];
   @OneToMany(() => Offer, (offer) => offer.owner, { nullable: true })
   offers: Offer[];
   @ManyToMany(() => Offer, (offer) => offer.participants, {
