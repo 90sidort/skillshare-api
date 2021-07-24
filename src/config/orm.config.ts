@@ -18,5 +18,6 @@ export default registerAs(
     database: process.env.DB_NAME,
     entities: [Skill, Offer, User, Category, Review],
     synchronize: true,
+    dropSchema: process.env.DB_DROP === 'true' ? true : false,
   }),
 );

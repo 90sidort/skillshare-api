@@ -22,10 +22,9 @@ import { createReviewDto, updateReviewDto } from './review.dto';
 import { Review } from './review.entity';
 import { User } from './../user/user.entity';
 import { ReviewService } from './review.service';
-import { CurrentUser } from 'src/user/authentication/currentUser.decorator';
-import { userSearchQuery } from 'src/user/user.dto';
-import { Role } from 'src/user/authorization/role.enum';
-import { AuthGuardJwt } from 'src/user/authentication/guard';
+import { CurrentUser } from './../user/authentication/currentUser.decorator';
+import { Role } from './../user/authorization/role.enum';
+import { AuthGuardJwt } from './../user/authentication/guard';
 
 @Controller('reviews')
 export class ReviewController {

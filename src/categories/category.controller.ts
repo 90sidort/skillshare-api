@@ -44,6 +44,7 @@ export class CategoryController {
       throw new HttpException(err.message || 'Failed to create category', 400);
     }
   }
+
   @UseGuards(AuthGuardJwt)
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
@@ -54,6 +55,7 @@ export class CategoryController {
       throw new HttpException('Failed to get categories', 404);
     }
   }
+
   @UseGuards(AuthGuardJwt)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
@@ -70,6 +72,7 @@ export class CategoryController {
       );
     }
   }
+
   @UseGuards(AuthGuardJwt, AdminGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Patch(':id')
@@ -78,12 +81,10 @@ export class CategoryController {
     @Body() input: CreateCategoryDto,
   ) {
     try {
-      const category = await this.repository.findOne(id);
-      if (!category)
+      const updateQuery = await this.categoryService.updateCategory(id, input);
+      if (updateQuery.affected === 0)
         throw new HttpException(`Failed to find category of id ${id}`, 404);
-      category.name = input.name;
-      await this.repository.save(category);
-      return category;
+      return true;
     } catch (err) {
       throw new HttpException(
         err.response || `Failed to update category of id: ${id}`,
@@ -91,6 +92,7 @@ export class CategoryController {
       );
     }
   }
+
   @UseGuards(AuthGuardJwt, AdminGuard)
   @Delete(':id')
   @HttpCode(204)
