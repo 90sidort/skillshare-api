@@ -7,11 +7,11 @@ import {
   Get,
   HttpCode,
   HttpException,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
-  SerializeOptions,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -68,11 +68,11 @@ export class CategoryController {
     try {
       const category = await this.categoryService.getCategory(id);
       if (!category)
-        throw new HttpException(`Failed to get category of id: ${id}`, 404);
+        throw new NotFoundException(`Category of id: ${id} does not exist`);
       return category;
     } catch (err) {
       throw new HttpException(
-        err.message || `Failed to get category of id: ${id}`,
+        err.response ? err.response : `Failed to get category of id: ${id}`,
         404,
       );
     }
@@ -88,11 +88,11 @@ export class CategoryController {
     try {
       const updateQuery = await this.categoryService.updateCategory(id, input);
       if (updateQuery.affected === 0)
-        throw new HttpException(`Failed to find category of id ${id}`, 404);
+        throw new NotFoundException(`Failed to find category of id ${id}`);
       return true;
     } catch (err) {
       throw new HttpException(
-        err.response || `Failed to update category of id: ${id}`,
+        err.response ? err.response : `Failed to update category of id: ${id}`,
         404,
       );
     }
@@ -109,8 +109,12 @@ export class CategoryController {
         throw new HttpException(`Category with id ${id} not found!`, 404);
       else return true;
     } catch (err) {
+      if (err.code === '23503')
+        throw new BadRequestException([
+          `Category with id ${id} is associated with skills and cannot be deleted`,
+        ]);
       throw new HttpException(
-        err.response || `Failed to delete category of id: ${id}`,
+        err.response ? err.response : `Failed to delete category of id: ${id}`,
         404,
       );
     }

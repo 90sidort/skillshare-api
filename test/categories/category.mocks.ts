@@ -2,6 +2,10 @@ export const newCategory = {
   name: 'New Category',
 };
 
+export const newCategoryChange = {
+  name: 'New Category Change',
+};
+
 export const newCategoryShort = {
   name: 'Ne',
 };

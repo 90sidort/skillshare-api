@@ -48,3 +48,4 @@ insert into "category" (id, name) values (11147, 'installation');
 insert into "category" (id, name) values (11148, 'Enhanced');
 insert into "category" (id, name) values (11149, 'Reverse-engineered');
 insert into "category" (id, name) values (11150, 'alliance');
+insert into "category" (id, name) values (11151, 'nonrelated');
