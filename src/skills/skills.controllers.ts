@@ -13,6 +13,8 @@ import {
   HttpException,
   ClassSerializerInterceptor,
   UseInterceptors,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -42,7 +44,7 @@ export class SkillsController {
       const { name, catId, description } = input;
       const category = await this.categoryRepository.findOne(catId);
       if (!category)
-        throw new HttpException(`Failed to fetch category with ${catId}`, 404);
+        throw new NotFoundException(`Failed to fetch category with ${catId}`);
       const skill = new Skill();
       skill.name = name;
       skill.category = category;
@@ -50,7 +52,10 @@ export class SkillsController {
       await this.repository.save(skill);
       return skill;
     } catch (err) {
-      throw new HttpException(`Failed to create skill`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to create skill`,
+        400,
+      );
     }
   }
 
@@ -75,7 +80,16 @@ export class SkillsController {
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async getSkill(@Param('id', ParseIntPipe) id: number) {
-    return await this.skillsService.getSkill(id);
+    try {
+      const skill = await this.skillsService.getSkill(id);
+      if (skill) return skill;
+      else throw new NotFoundException(`Failed to find skill of id ${id}`);
+    } catch (err) {
+      throw new HttpException(
+        err.response ? err.response : `Failed to get skill with ${id}`,
+        400,
+      );
+    }
   }
 
   @UseGuards(AuthGuardJwt, AdminGuard)
@@ -121,10 +135,17 @@ export class SkillsController {
     try {
       const result = await this.skillsService.deleteSkill(id);
       if (result?.affected !== 1)
-        throw new HttpException(`Skill with id ${id} not found!`, 404);
+        throw new NotFoundException(`Skill with id ${id} not found!`);
       else return true;
     } catch (err) {
-      throw new HttpException(`Failed to delete skill with id ${id}`, 404);
+      if (err.code === '23503')
+        throw new BadRequestException(
+          `Cannot delete skill of id ${id} with active offers`,
+        );
+      throw new HttpException(
+        err.response ? err.response : `Failed to delete skill with id ${id}`,
+        404,
+      );
     }
   }
 }

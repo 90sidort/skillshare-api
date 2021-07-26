@@ -10,8 +10,8 @@ export class CreateSkillDto {
   })
   name: string;
   @IsString({ message: 'Description should be a string' })
-  @Length(1, 400, {
-    message: 'Description needs at least 1 character, up to 400 characters!',
+  @Length(3, 400, {
+    message: 'Description needs at least 3 characters, up to 400 characters!',
   })
   description: string;
 }
