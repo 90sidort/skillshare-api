@@ -123,8 +123,6 @@ export class ReviewController {
       await this.reviewRepository.save(reviewUpdate);
       return reviewUpdate;
     } catch (err) {
-      console.log(err);
-
       throw new HttpException(`Failed to update review`, 400);
     }
   }

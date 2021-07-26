@@ -75,7 +75,6 @@ export class OfferController {
         search,
       );
     } catch (err) {
-      console.log(err);
       throw new HttpException(`Failed to fetch offers`, 400);
     }
   }

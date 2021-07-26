@@ -28,7 +28,7 @@ describe('E2E categories tests', () => {
     await loadFixture(connection, '_user_.sql');
     token = getToken(
       {
-        id: 101,
+        id: 111101,
         username: 'admin',
         roles: [Role.Admin],
       },
@@ -44,7 +44,6 @@ describe('E2E categories tests', () => {
       .post('/category')
       .set('Authorization', `Bearer ${token}`)
       .send(newCategory);
-    console.log(result.body);
     expect(result.status).toEqual(201);
   });
   // it('Should not be able to create category without mandatory data', async () => {
@@ -53,16 +52,16 @@ describe('E2E categories tests', () => {
   //     .send({})
   //     .set('Authorization', `Bearer ${token}`);
   // });
-  it('Test', async () => {
-    const test = await request(app.getHttpServer())
-      .get('/category')
-      .set('Authorization', `Bearer ${token}`);
-    expect(test.status).toEqual(200);
-    expect(test.body.length).toBeGreaterThan(1);
-    expect(test.body[0]).toMatchObject({
-      id: expect.any(Number),
-      name: expect.any(String),
-      skillCount: expect.any(Number),
-    });
-  });
+  // it('Test', async () => {
+  //   const test = await request(app.getHttpServer())
+  //     .get('/category')
+  //     .set('Authorization', `Bearer ${token}`);
+  //   expect(test.status).toEqual(200);
+  //   expect(test.body.length).toBeGreaterThan(1);
+  //   expect(test.body[0]).toMatchObject({
+  //     id: expect.any(Number),
+  //     name: expect.any(String),
+  //     skillCount: expect.any(Number),
+  //   });
+  // });
 });

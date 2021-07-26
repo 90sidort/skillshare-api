@@ -36,13 +36,11 @@ export class CategoryController {
   @UseInterceptors(ClassSerializerInterceptor)
   async addCategory(@Body() input: CreateCategoryDto) {
     try {
-      console.log(input);
       const category = new Category();
       category.name = input.name;
       await this.repository.save(category);
       return category;
     } catch (err) {
-      console.log(err);
       throw new HttpException(err.message || 'Failed to create category', 400);
     }
   }
