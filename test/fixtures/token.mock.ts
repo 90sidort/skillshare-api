@@ -1,8 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 
-import { Role } from './../../src/user/authorization/role.enum';
-import { UserService } from './../../src/user/user.service';
-import { User } from './../../src/user/user.entity';
+import { Role } from '../../src/user/authorization/role.enum';
+import { UserService } from '../../src/user/user.service';
+import { User } from '../../src/user/user.entity';
 
 export default (
   user: Partial<User> = {

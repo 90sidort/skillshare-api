@@ -50,10 +50,7 @@ export class SkillsController {
       await this.repository.save(skill);
       return skill;
     } catch (err) {
-      throw new HttpException(
-        err.response.message || `Failed to create skill`,
-        400,
-      );
+      throw new HttpException(`Failed to create skill`, 400);
     }
   }
 
