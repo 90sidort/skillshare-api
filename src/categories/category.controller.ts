@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -41,7 +42,11 @@ export class CategoryController {
       await this.repository.save(category);
       return category;
     } catch (err) {
-      throw new HttpException(err.message || 'Failed to create category', 400);
+      if (err.code === '23505')
+        throw new BadRequestException([
+          `Category with name ${input.name} already exists`,
+        ]);
+      throw new HttpException('Failed to create category', 400);
     }
   }
 

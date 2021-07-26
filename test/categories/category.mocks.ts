@@ -1,3 +1,11 @@
 export const newCategory = {
   name: 'New Category',
 };
+
+export const newCategoryShort = {
+  name: 'Ne',
+};
+
+export const newCategoryLong = {
+  name: 'NewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategoryNewCategory',
+};
