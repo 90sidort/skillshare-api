@@ -23,8 +23,6 @@ export class createReviewDto {
   @Min(1, { message: 'Rating cannot be less than 1' })
   @Max(10, { message: 'Rating cannot be greater than 10' })
   rating: number;
-  @IsInt({ message: 'Author id must be a number' })
-  authorId: number;
   @IsInt({ message: 'Reviewd id must be a number' })
   reviewedId: number;
 }

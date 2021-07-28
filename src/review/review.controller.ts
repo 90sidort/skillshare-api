@@ -39,12 +39,17 @@ export class ReviewController {
   @UseGuards(AuthGuardJwt)
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  async createReview(@Body() input: createReviewDto) {
-    const { title, rating, review, reviewedId, authorId } = input;
+  async createReview(
+    @Body() input: createReviewDto,
+    @CurrentUser() user: User,
+  ) {
+    const { title, rating, review, reviewedId } = input;
     try {
-      const author = await this.userRepository.findOne(authorId);
+      if (user.id === reviewedId)
+        throw new BadRequestException('You cannot review yourself!');
+      const author = await this.userRepository.findOne(user.id);
       if (!author)
-        throw new HttpException(`User with id: ${authorId} not found!`, 404);
+        throw new HttpException(`User with id: ${user.id} not found!`, 404);
       const reviewed = await this.userRepository.findOne(reviewedId);
       if (!reviewed)
         throw new HttpException(`User with id: ${reviewedId} not found!`, 404);

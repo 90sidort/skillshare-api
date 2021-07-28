@@ -18,7 +18,7 @@ export enum ReviewStatusEnum {
 export class Review {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ name: 'name', length: 400 })
+  @Column({ name: 'title', length: 400 })
   title: string;
   @Column({ name: 'review', length: 3000, nullable: true })
   review: string;
