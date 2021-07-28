@@ -85,6 +85,6 @@ insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status
 insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2085, 'Ergonomic next generation paradigm', 5, 11194, 11115, '2');
 insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2086, 'Digitized heuristic process improvement', 6, 11195, 11114, '2');
 insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2087, 'Ameliorated regional implementation', 7, 11196, 11113, '2');
-insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2088, 'Devolved homogeneous orchestration', 8, 11197, 11112, '2');
+insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2088, 'Devolved homogeneous orchestration', 8, 11197, 111100, '2');
 insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2089, 'Function-based client-driven toolset', 9, 11198, 11111, '2');
-insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2090, 'Object-based 6th generation focus group', 10, 11199, 11110, '2');
+insert into "review" ("id", "title", "rating", "reviewedId", "authorId", "status") values (2090, 'Object-based 6th generation focus group', 10, 11199, 111100, '2');

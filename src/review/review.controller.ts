@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   HttpException,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -62,7 +63,10 @@ export class ReviewController {
       await this.reviewRepository.save(newReview);
       return newReview;
     } catch (err) {
-      throw new HttpException(err.response || `Failed to create review`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to create review`,
+        400,
+      );
     }
   }
 
@@ -71,9 +75,14 @@ export class ReviewController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getReview(@Param('id', ParseIntPipe) id: number) {
     try {
-      return await this.reviewService.getReviewById(id);
+      const review = await this.reviewService.getReviewById(id);
+      if (review) return review;
+      throw new NotFoundException(`Failed to find review with id ${id}`);
     } catch (err) {
-      throw new HttpException(`Failed to fetch reviews`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to fetch reviews`,
+        400,
+      );
     }
   }
 
@@ -110,6 +119,8 @@ export class ReviewController {
     @CurrentUser() user: User,
   ) {
     const { title, rating, review, status } = input;
+    if (!title && !rating && !review && !status)
+      throw new HttpException(`No updates for review id ${id}`, 400);
     try {
       const reviewUpdate = await this.reviewRepository.findOne(id, {
         relations: ['author'],
@@ -120,7 +131,7 @@ export class ReviewController {
         reviewUpdate.author.id !== user.id &&
         !user.roles.includes(Role.Admin)
       )
-        throw new HttpException(`Unauthorized to update review id ${id}`, 404);
+        throw new HttpException(`Unauthorized to update review id ${id}`, 401);
       if (title) reviewUpdate.title = title;
       if (rating) reviewUpdate.rating = rating;
       if (review) reviewUpdate.review = review;
@@ -128,7 +139,10 @@ export class ReviewController {
       await this.reviewRepository.save(reviewUpdate);
       return reviewUpdate;
     } catch (err) {
-      throw new HttpException(`Failed to update review`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to update review`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -148,7 +162,7 @@ export class ReviewController {
         !user.roles.includes(Role.Admin)
       )
         throw new HttpException(
-          `Unauthorized to delete review with id ${id} not found!`,
+          `Unauthorized to delete review with id ${id}!`,
           401,
         );
       const result = await this.reviewService.deleteReview(id);
@@ -156,7 +170,10 @@ export class ReviewController {
         throw new HttpException(`Review with id ${id} not found!`, 404);
       else return true;
     } catch (err) {
-      throw new HttpException(`Failed to delete review with id ${id}`, 404);
+      throw new HttpException(
+        err.response ? err.response : `Failed to delete review with id ${id}`,
+        err.status ? err.stats : 404,
+      );
     }
   }
 }

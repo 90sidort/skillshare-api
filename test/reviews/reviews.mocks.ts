@@ -12,6 +12,13 @@ export const newReviewText = {
     'This is a review body. This review is just a test review, so do not think much of it.',
 };
 
+export const newReviewTextChanged = {
+  title: 'New test review with changed text',
+  rating: 2,
+  review:
+    'This is a review body. This review is just a test review, so do not think much of it. But its changed.',
+};
+
 export const newReviewInvalid = {
   title: 'New test review with text'.repeat(100),
   rating: 12,
