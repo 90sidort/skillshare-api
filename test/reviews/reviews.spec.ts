@@ -281,22 +281,21 @@ describe('E2E reviews tests', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(result.status).toEqual(204);
   });
-  // it('Should not be able to delete review of sb else as user', async () => {
-  //   const result = await request(app.getHttpServer())
-  //     .delete('/reviews/2060')
-  //     .set('Authorization', `Bearer ${userToken}`);
-  //   console.log(result.body, 12312312312);
+  it('Should not be able to delete review of sb else as user', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/reviews/2060')
+      .set('Authorization', `Bearer ${userToken}`);
 
-  //   expect(result.body.message).toEqual(
-  //     'Unauthorized to delete review with id 2060!',
-  //   );
-  //   expect(result.status).toEqual(401);
-  // });
-  // it('Should not be able to delete nonexistent review', async () => {
-  //   const result = await request(app.getHttpServer())
-  //     .delete('/reviews/201260')
-  //     .set('Authorization', `Bearer ${token}`);
-  //   expect(result.body.message).toEqual('Review with id 201260 not found!');
-  //   expect(result.status).toEqual(404);
-  // });
+    expect(result.body.message).toEqual(
+      'Unauthorized to delete review with id 2060!',
+    );
+    expect(result.status).toEqual(401);
+  });
+  it('Should not be able to delete nonexistent review', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/reviews/201260')
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.body.message).toEqual('Review with id 201260 not found!');
+    expect(result.status).toEqual(404);
+  });
 });

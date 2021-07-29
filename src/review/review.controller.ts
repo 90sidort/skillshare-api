@@ -171,8 +171,8 @@ export class ReviewController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err.response ? err.response : `Failed to delete review with id ${id}`,
-        err.status ? err.stats : 404,
+        err.response ? err.response : `Failed to delete review`,
+        err.status ? err.status : 400,
       );
     }
   }
