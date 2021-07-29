@@ -27,7 +27,7 @@ export class SignupDto {
   surname: string;
   @Length(3, 300, {
     message:
-      'Password cannot be shorter than 3 characters and longer than 100!',
+      'Password cannot be shorter than 3 characters and longer than 300!',
   })
   password: string;
   @Length(3, 300, {

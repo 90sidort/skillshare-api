@@ -53,7 +53,10 @@ export class UsersController {
         token: this.userService.getTokenForUser(user),
       };
     } catch (err) {
-      throw new HttpException(err.response.message || `Failed to signin`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to signin`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -62,7 +65,7 @@ export class UsersController {
   async create(@Body() input: SignupDto) {
     try {
       if (input.password !== input.retype)
-        throw new BadRequestException(['Passwords does not match!']);
+        throw new BadRequestException(['Passwords do not match!']);
       const exists = await this.userRepository.findOne({
         where: [{ username: input.username }, { email: input.email }],
       });
@@ -75,13 +78,20 @@ export class UsersController {
       user.password = await this.userService.hashPassword(input.password);
       user.email = input.email;
       user.about = input.about;
+      await this.userRepository.save(user);
 
       return {
-        ...(await this.userRepository.save(user)),
+        ...user,
+        password: null,
+        createdAt: null,
+        updatedAt: null,
         token: this.userService.getTokenForUser(user),
       };
     } catch (err) {
-      throw new HttpException(err.response.message || `Failed to signup`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to signup`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -98,7 +108,10 @@ export class UsersController {
         search,
       );
     } catch (err) {
-      throw new HttpException(`Failed to fetch users`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to fetch users`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -107,9 +120,15 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getUser(@Param('id', ParseIntPipe) id: number) {
     try {
-      return await this.userService.getUserWithCountsAndRelations(id);
+      const user = await this.userService.getUserWithCountsAndRelations(id);
+      if (!user)
+        throw new HttpException(`User with id: ${id} does not exist`, 404);
+      return user;
     } catch (err) {
-      throw new HttpException(`Failed to fetch user`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to fetch user`,
+        err.status ? err.status : 400,
+      );
     }
   }
 

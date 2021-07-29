@@ -285,7 +285,6 @@ describe('E2E reviews tests', () => {
     const result = await request(app.getHttpServer())
       .delete('/reviews/2060')
       .set('Authorization', `Bearer ${userToken}`);
-
     expect(result.body.message).toEqual(
       'Unauthorized to delete review with id 2060!',
     );

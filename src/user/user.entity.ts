@@ -7,10 +7,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 import { Role } from './authorization/role.enum';
 import { Offer } from './../offer/offer.entity';
-import { Exclude } from 'class-transformer';
 import { Review } from './../review/review.entity';
 
 @Entity()
@@ -24,7 +24,7 @@ export class User {
   @Column({ name: 'surname', length: 300 })
   surname: string;
   @Column({ name: 'password', length: 100 })
-  @Exclude({ toPlainOnly: true })
+  @Exclude()
   password: string;
   @Column({ name: 'email', length: 300, unique: true })
   email: string;

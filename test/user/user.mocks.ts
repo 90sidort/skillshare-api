@@ -1,0 +1,24 @@
+export const signinUser = {
+  username: 'admin',
+  password: 'testtest2',
+};
+
+export const signupUser = {
+  username: 'testuser',
+  name: 'Test',
+  surname: 'Testowy',
+  password: 'testowehaslo',
+  retype: 'testowehaslo',
+  email: 'test@email.com',
+  about: 'Dis is a short test. So lets check if it works!',
+};
+
+export const signupUserInvalid = {
+  username: 'te',
+  name: 'Te',
+  surname: 'Te',
+  password: 'te',
+  retype: 'te',
+  email: 'test',
+  about: 'Dis is a short test. So lets check if it works!'.repeat(8),
+};
