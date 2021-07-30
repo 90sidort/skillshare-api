@@ -62,6 +62,13 @@ export class UserService {
       })
       .getOne();
   }
+  public async getUserByEmail(email: string) {
+    return await this.getUserBaseQuery()
+      .andWhere('u.email = :email', {
+        email,
+      })
+      .getOne();
+  }
   public async getUserWithCountsAndRelations(id: number) {
     return await this.getUsersWithCounts()
       .andWhere('u.id = :id', {

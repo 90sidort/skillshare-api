@@ -153,7 +153,7 @@ export class UsersController {
       const user = await this.userService.getUserById(id);
       if (!user)
         throw new HttpException(`Failed to fetch user with id ${id}`, 404);
-      if (user.id !== userReq.id && !user.roles.includes(Role.Admin))
+      if (user.id !== userReq.id && !userReq.roles.includes(Role.Admin))
         throw new HttpException(
           `Unauthorized to update user with id ${id}`,
           403,
@@ -171,7 +171,7 @@ export class UsersController {
       if (name) user.name = name;
       if (surname) user.surname = surname;
       if (about) user.about = about;
-      if (newPassword && retypeNewPassword) {
+      if (newPassword) {
         if (!password)
           throw new HttpException(
             `Cannot update password without providing old one`,
@@ -186,13 +186,21 @@ export class UsersController {
           throw new HttpException(`Passwords do not match`, 403);
         user.password = await this.userService.hashPassword(newPassword);
       }
-      if (email) user.email = email;
+      if (email) {
+        const emailExists = await this.userService.getUserByEmail(email);
+        if (emailExists)
+          throw new HttpException(
+            `Email ${email} is taken. Use another email!`,
+            400,
+          );
+        user.email = email;
+      }
       await this.userRepository.save(user);
       return user;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to update user`,
-        400,
+        err.response ? err.response : `Failed to update user`,
+        err.status ? err.status : 400,
       );
     }
   }
@@ -206,7 +214,7 @@ export class UsersController {
         relations: ['participates', 'applied', 'offers'],
       });
       if (!user) throw new HttpException(`User with id ${id} not found!`, 404);
-      if (user.id !== userReq.id && !user.roles.includes(Role.Admin))
+      if (user.id !== userReq.id && !userReq.roles.includes(Role.Admin))
         throw new HttpException(
           `Unauthorized to delete user with id ${id}`,
           403,
@@ -223,8 +231,8 @@ export class UsersController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to delete User with id ${id}`,
-        404,
+        err.response ? err.response : `Failed to delete User with id ${id}`,
+        err.status ? err.status : 400,
       );
     }
   }

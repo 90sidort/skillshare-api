@@ -6,7 +6,7 @@ import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import loadFixture from '../fixtures/loadFixtures';
 import getToken from '../fixtures/token.mock';
-import { Role } from './../../src/user/authorization/role.enum';
+import { Role } from '../../src/user/authorization/role.enum';
 import {
   newSkill,
   newSkillChange,

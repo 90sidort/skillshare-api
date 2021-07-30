@@ -13,6 +13,16 @@ export const signupUser = {
   about: 'Dis is a short test. So lets check if it works!',
 };
 
+export const updateUser = {
+  name: 'Changed name',
+  surname: 'Changed surname',
+  newPassword: 'testowehaslo',
+  retypeNewPassword: 'testowehaslo',
+  password: 'testtest2',
+  email: 'wolny@email.com',
+  about: 'Dis is a short test. So lets check if it works!',
+};
+
 export const signupUserInvalid = {
   username: 'te',
   name: 'Te',

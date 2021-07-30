@@ -7,7 +7,12 @@ import { AppModule } from '../../src/app.module';
 import loadFixture from '../fixtures/loadFixtures';
 import getToken from '../fixtures/token.mock';
 import { Role } from './../../src/user/authorization/role.enum';
-import { signinUser, signupUser, signupUserInvalid } from './user.mocks';
+import {
+  signinUser,
+  signupUser,
+  signupUserInvalid,
+  updateUser,
+} from './user.mocks';
 
 let app: INestApplication;
 let mod: TestingModule;
@@ -16,6 +21,8 @@ let connection: Connection;
 describe('E2E user tests', () => {
   let token;
   let userToken;
+  let changedToken;
+  let deleteToken;
   beforeAll(async () => {
     mod = await Test.createTestingModule({
       imports: [AppModule],
@@ -40,6 +47,22 @@ describe('E2E user tests', () => {
       {
         id: 111100,
         username: 'kduberry2r',
+        roles: [Role.User],
+      },
+      app,
+    );
+    changedToken = getToken(
+      {
+        id: 11199,
+        username: 'sayling2q',
+        roles: [Role.User],
+      },
+      app,
+    );
+    deleteToken = getToken(
+      {
+        id: 11173,
+        username: 'ocuddihy20',
         roles: [Role.User],
       },
       app,
@@ -267,5 +290,139 @@ describe('E2E user tests', () => {
       .set('Authorization', `Bearer ${userToken}`);
     expect(result.body.message).toEqual('User with id: 99 does not exist');
     expect(result.status).toEqual(404);
+  });
+  it('Should be able to update user data', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/11199')
+      .send(updateUser)
+      .set('Authorization', `Bearer ${changedToken}`);
+    expect(result.body).toMatchObject({
+      id: 11199,
+      username: 'sayling2q',
+      name: 'Changed name',
+      surname: 'Changed surname',
+      email: 'wolny@email.com',
+      about: 'Dis is a short test. So lets check if it works!',
+      roles: 'user',
+    });
+    expect(result.status).toEqual(200);
+  });
+  it('Should not be able to update password without providing old one', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/111100')
+      .send({ ...updateUser, password: undefined })
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual(
+      'Cannot update password without providing old one',
+    );
+  });
+  it('Should not be able to update password without providing old one', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/111100')
+      .send({ ...updateUser, password: 'incorrect' })
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual(
+      'Provided password does not match accounts password',
+    );
+  });
+  it('Should not be able to update password if retype is incorrect', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/111100')
+      .send({ ...updateUser, retypeNewPassword: undefined })
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual('Passwords do not match');
+  });
+  it('Should not be able to update email if user with such email already exists in the database', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/111100')
+      .send({ ...updateUser, email: 'kduberry2r@opensource.org' })
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual(
+      'Email kduberry2r@opensource.org is taken. Use another email!',
+    );
+  });
+  it('Should not be able to update user with invalid data', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/111100')
+      .send({
+        ...updateUser,
+        name: 'aa',
+        surname: 'bb'.repeat(300),
+        email: 'invalidMail',
+        about: 'a',
+      })
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual([
+      'Name cannot be shorter than 3 characters and longer than 300!',
+      'Surname cannot be shorter than 3 characters and longer than 300!',
+      'email must be an email',
+      'About cannot be shorter than 3 characters and longer than 2000!',
+    ]);
+  });
+  it('Should not be able to update other user as user', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/11199')
+      .send(updateUser)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual(
+      'Unauthorized to update user with id 11199',
+    );
+  });
+  it('Should be able to update other user as admin', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/users/11199')
+      .send({
+        ...updateUser,
+        email: 'otheremail@test.com',
+        name: 'otherChange',
+        password: undefined,
+        newPassword: undefined,
+        retypeNewPassword: undefined,
+      })
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toEqual(200);
+    expect(result.body).toMatchObject({
+      id: 11199,
+      username: 'sayling2q',
+      name: 'otherChange',
+      surname: expect.any(String),
+      email: expect.any(String),
+      about: expect.any(String),
+      roles: 'user',
+    });
+  });
+  it('Should be able to delete user account', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/users/11173')
+      .set('Authorization', `Bearer ${deleteToken}`);
+    expect(result.status).toEqual(204);
+  });
+  it('Should not be able to delete other user account as user', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/users/11110')
+      .set('Authorization', `Bearer ${changedToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual(
+      'Unauthorized to delete user with id 11110',
+    );
+  });
+  it('Should be able to delete other user account as admin', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/users/11171')
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toEqual(204);
+  });
+  it('Should not be able to delete nonexisting user account', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/users/112')
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('User with id 112 not found!');
   });
 });
