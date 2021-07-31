@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpException,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -41,24 +42,27 @@ export class OfferController {
   @UseGuards(AuthGuardJwt)
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  async createOffer(@Body() input: CreateOfferDto) {
+  async createOffer(@Body() input: CreateOfferDto, @CurrentUser() user: User) {
     try {
-      const { title, description, ownerId, skillId } = input;
+      const { title, description, skillId } = input;
       const skill = await this.skillRepository.findOne(skillId);
       if (!skill)
         throw new HttpException(`Failed to fetch skill of id: ${skillId}`, 404);
-      const user = await this.userRepository.findOne(ownerId);
-      if (!user)
-        throw new HttpException(`Failed to fetch user of id: ${ownerId}`, 404);
+      const owner = await this.userRepository.findOne(user.id);
+      if (!owner)
+        throw new HttpException(`Failed to fetch user of id: ${user.id}`, 404);
       const offer = new Offer();
       offer.title = title;
       offer.description = description;
-      offer.owner = user;
+      offer.owner = owner;
       offer.skill = skill;
       await this.repository.save(offer);
       return offer;
     } catch (err) {
-      throw new HttpException(`Failed to create offer`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to create offer`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -75,7 +79,10 @@ export class OfferController {
         search,
       );
     } catch (err) {
-      throw new HttpException(`Failed to fetch offers`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to create offer`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -84,9 +91,14 @@ export class OfferController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getOffer(@Param('id', ParseIntPipe) id: number) {
     try {
-      return await this.offersService.getSingleOffer(id);
+      const offer = await this.offersService.getSingleOffer(id);
+      if (!offer) throw new NotFoundException(`Offer with id ${id} not found!`);
+      return offer;
     } catch (err) {
-      throw new HttpException(`Failed to fetch offer with id: ${id}`, 400);
+      throw new HttpException(
+        err.response ? err.response : `Failed to create offer`,
+        err.status ? err.status : 400,
+      );
     }
   }
 
@@ -99,19 +111,25 @@ export class OfferController {
     @CurrentUser() user: User,
   ) {
     try {
-      const { title, description, skillId, available } = input;
+      const { title, description, skillId, available, status } = input;
       let skill = undefined;
       const offer = await this.repository.findOne(id);
+      if (!offer)
+        throw new HttpException(`Failed to fetch offer with id ${id}`, 404);
       if (offer.ownerId !== user.id && !user.roles.includes(Role.Admin))
         throw new HttpException(
           `Unauthorized to change offer with id ${id}`,
           403,
         );
-      if (!title && !description && !skillId && available === undefined)
+      if (
+        !title &&
+        !description &&
+        !skillId &&
+        !status &&
+        available === undefined
+      )
         return offer;
-      if (!offer)
-        throw new HttpException(`Failed to fetch offer with id ${id}`, 404);
-      if (skillId) skill = this.skillRepository.findOne(skillId);
+      if (skillId) skill = await this.skillRepository.findOne(skillId);
       if (skillId && skill === undefined)
         throw new HttpException(
           `Failed to fetch skill with id ${skillId}`,
@@ -119,14 +137,15 @@ export class OfferController {
         );
       if (skillId && skill) offer.skill = skill;
       if (title) offer.title = title;
+      if (status) offer.status = status;
       if (description) offer.description = description;
       if (available !== undefined) offer.available = available;
       await this.repository.save(offer);
       return offer;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to update offer with id: ${id}`,
-        400,
+        err.response ? err.response : `Failed to create offer`,
+        err.status ? err.status : 400,
       );
     }
   }
