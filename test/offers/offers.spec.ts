@@ -302,4 +302,49 @@ describe('E2E offers tests', () => {
       'Limit must be a number',
     ]);
   });
+  it('Should be able to delete offer as user', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/offer/111102')
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(204);
+  });
+  it('Should not be able to delete offer of other user as user', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/offer/11188')
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual(
+      'Unauthorized to delete offer with id 11188',
+    );
+  });
+  it('Should not be able to delete offer that does not exist', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/offer/997')
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('Offer with id 997 not found!');
+  });
+  it('Should be able to delete offer of other user as admin', async () => {
+    const result = await request(app.getHttpServer())
+      .delete('/offer/11172')
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toEqual(204);
+  });
+  it('Should not be able to delete offer with applicants', async () => {
+    await request(app.getHttpServer())
+      .patch('/actions/apply')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        userId: 111100,
+        offerId: 11167,
+      });
+
+    const result = await request(app.getHttpServer())
+      .delete('/offer/11167')
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual(
+      'Offer with id 11167 has active members!',
+    );
+  });
 });

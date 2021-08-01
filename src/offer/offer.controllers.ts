@@ -159,13 +159,13 @@ export class OfferController {
       const offer = await this.repository.findOne(id, {
         relations: ['applicants', 'participants'],
       });
+      if (!offer)
+        throw new HttpException(`Offer with id ${id} not found!`, 404);
       if (offer.ownerId !== user.id && !user.roles.includes(Role.Admin))
         throw new HttpException(
           `Unauthorized to delete offer with id ${id}`,
           403,
         );
-      if (!offer)
-        throw new HttpException(`Offer with id ${id} not found!`, 404);
       if (offer.applicants.length > 0 || offer.participants.length > 0)
         throw new HttpException(`Offer with id ${id} has active members!`, 404);
       const result = await this.offersService.deleteOffer(id);
@@ -174,8 +174,8 @@ export class OfferController {
       else return true;
     } catch (err) {
       throw new HttpException(
-        err.response.message || `Failed to delete offer with id ${id}`,
-        404,
+        err.response ? err.response : `Failed to create offer`,
+        err.status ? err.status : 400,
       );
     }
   }
