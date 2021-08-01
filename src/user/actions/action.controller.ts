@@ -1,10 +1,12 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpException,
   Patch,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -27,23 +29,19 @@ export class ActionController {
   ) {}
 
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Patch('/apply')
   async apply(@Body() input: ApplyDto, @CurrentUser() userReq: User) {
-    const { userId, offerId } = input;
-    if (userId !== userReq.id)
-      throw new HttpException(
-        `User with id: ${userReq.id} is unauthorized!`,
-        404,
-      );
+    const { offerId } = input;
     try {
-      const user = await this.userRepository.findOne(userId, {
+      const user = await this.userRepository.findOne(userReq.id, {
         relations: ['applied', 'participates'],
       });
       if (!user)
-        throw new HttpException(`User with id ${userId} not found!`, 404);
+        throw new HttpException(`User with id ${userReq.id} not found!`, 404);
       if (user.applied.length + user.participates.length >= 10)
         throw new HttpException(
-          `User with id ${userId} has already reached skill share limit of 10!`,
+          `User with id ${userReq.id} has already reached skill share limit of 10!`,
           404,
         );
       const offer = await this.offerRepository.findOne(offerId, {
@@ -51,7 +49,9 @@ export class ActionController {
       });
       if (!offer)
         throw new HttpException(`Offer with id ${offerId} not found!`, 404);
-      if (offer.participants.length < offer.limit) {
+      if (offer.ownerId === userReq.id)
+        throw new HttpException(`Can't apply for your own offer`, 400);
+      if (offer.participants.length + 1 < offer.limit) {
         offer.applicants.push(user);
         await this.offerRepository.save(offer);
       } else {
@@ -62,32 +62,32 @@ export class ActionController {
       }
       return offer;
     } catch (err) {
-      throw new HttpException(`Failed to apply for offer`, 403);
+      throw new HttpException(
+        err.response
+          ? err.response
+          : `Failed to apply for offer of id: ${offerId}`,
+        err.status ? err.status : 404,
+      );
     }
   }
 
   @UseGuards(AuthGuardJwt)
   @Patch('/deapply')
   async deapply(@Body() input: ApplyDto, @CurrentUser() userReq: User) {
-    const { userId, offerId } = input;
-    if (userId !== userReq.id)
-      throw new HttpException(
-        `User with id: ${userReq.id} is unauthorized!`,
-        404,
-      );
+    const { offerId } = input;
     try {
-      const user = await this.userRepository.findOne(userId, {
+      const user = await this.userRepository.findOne(userReq.id, {
         relations: ['applied', 'participates'],
       });
       if (!user)
-        throw new HttpException(`User with id ${userId} not found!`, 404);
+        throw new HttpException(`User with id ${userReq.id} not found!`, 404);
       const offer = await this.offerRepository.findOne(offerId, {
         relations: ['participants', 'applicants'],
       });
       if (!offer)
         throw new HttpException(`Offer with id ${offerId} not found!`, 404);
       offer.applicants = offer.applicants.filter(
-        (applicant) => applicant.id !== userId,
+        (applicant) => applicant.id !== userReq.id,
       );
       await this.offerRepository.save(offer);
       return offer;
@@ -115,13 +115,13 @@ export class ActionController {
     @Body() input: AnswerApplicationDto,
     @CurrentUser() userReq: User,
   ) {
-    const { userId, offerId, accepted } = input;
+    const { offerId, accepted } = input;
     try {
-      const user = await this.userRepository.findOne(userId, {
+      const user = await this.userRepository.findOne(userReq.id, {
         relations: ['applied', 'participates'],
       });
       if (!user)
-        throw new HttpException(`User with id ${userId} not found!`, 404);
+        throw new HttpException(`User with id ${userReq.id} not found!`, 404);
       const offer = await this.offerRepository.findOne(offerId, {
         relations: ['participants', 'applicants'],
       });
@@ -146,7 +146,7 @@ export class ActionController {
         offer.participants.push(user);
       }
       offer.applicants = offer.applicants.filter(
-        (applicant) => applicant.id !== userId,
+        (applicant) => applicant.id !== userReq.id,
       );
       await this.offerRepository.save(offer);
       return offer;
@@ -158,14 +158,14 @@ export class ActionController {
   @UseGuards(AuthGuardJwt)
   @Patch('/remove')
   async remove(@Body() input: ApplyDto, @CurrentUser() userReq: User) {
-    const { userId, offerId } = input;
+    const { offerId } = input;
     try {
-      const user = await this.userRepository.findOne(userId, {
+      const user = await this.userRepository.findOne(userReq.id, {
         relations: ['participates'],
       });
       if (!user)
-        throw new HttpException(`User with id ${userId} not found!`, 404);
-      if (userId !== userReq.id && user.id !== userReq.id)
+        throw new HttpException(`User with id ${userReq.id} not found!`, 404);
+      if (user.id !== userReq.id)
         throw new HttpException(
           `User with id: ${userReq.id} is unauthorized!`,
           404,
@@ -176,7 +176,7 @@ export class ActionController {
       if (!offer)
         throw new HttpException(`Offer with id ${offerId} not found!`, 404);
       offer.participants = offer.participants.filter(
-        (participant) => participant.id !== userId,
+        (participant) => participant.id !== userReq.id,
       );
       await this.offerRepository.save(offer);
       return offer;

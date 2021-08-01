@@ -335,7 +335,6 @@ describe('E2E offers tests', () => {
       .patch('/actions/apply')
       .set('Authorization', `Bearer ${userToken}`)
       .send({
-        userId: 111100,
         offerId: 11167,
       });
 
