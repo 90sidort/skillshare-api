@@ -7,4 +7,5 @@ insert into "offer_applicants_user" ("offerId", "userId") values (11125, 11144);
 insert into "offer_applicants_user" ("offerId", "userId") values (11126, 11144);
 insert into "offer_applicants_user" ("offerId", "userId") values (11127, 11144);
 insert into "offer_applicants_user" ("offerId", "userId") values (11128, 11144);
-insert into "offer_applicants_user" ("offerId", "userId") values (11129, 11144);
+insert into "offer_applicants_user" ("offerId", "userId") values (11129, 11144)
+insert into "offer_applicants_user" ("offerId", "userId") values (11123, 111100);

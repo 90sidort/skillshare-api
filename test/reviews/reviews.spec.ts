@@ -69,7 +69,7 @@ describe('E2E reviews tests', () => {
       .send(newReviewText);
     expect(result.status).toEqual(201);
   });
-  it('Should be able to create review for yourself', async () => {
+  it('Should not be able to create review for yourself', async () => {
     const result = await request(app.getHttpServer())
       .post('/reviews')
       .set('Authorization', `Bearer ${userToken}`)
@@ -109,7 +109,7 @@ describe('E2E reviews tests', () => {
       .post('/reviews')
       .set('Authorization', `Bearer ${userToken}`)
       .send({ ...newReviewText, reviewedId: 9999999 });
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
     expect(result.body.message).toEqual('User with id: 9999999 not found!');
   });
   it('Should be able to get reviews as admin', async () => {
@@ -201,7 +201,7 @@ describe('E2E reviews tests', () => {
     const result = await request(app.getHttpServer())
       .get('/reviews/2138')
       .set('Authorization', `Bearer ${token}`);
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
     expect(result.body.message).toEqual('Failed to find review with id 2138');
   });
   it('Should be able to update review', async () => {

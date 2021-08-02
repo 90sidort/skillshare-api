@@ -67,7 +67,7 @@ describe('E2E skills tests', () => {
       .set('Authorization', `Bearer ${token}`)
       .send(newSkillInvalidCat);
     expect(result.body.message).toEqual('Failed to fetch category with 9115');
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
   });
   it('Should not be able to create skill without mandatory data', async () => {
     const result = await request(app.getHttpServer())
@@ -181,7 +181,7 @@ describe('E2E skills tests', () => {
     const result = await request(app.getHttpServer())
       .get('/skills/999')
       .set('Authorization', `Bearer ${token}`);
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
     expect(result.body.message).toEqual('Failed to find skill of id 999');
   });
   it('Should be able to update skill', async () => {
@@ -211,12 +211,12 @@ describe('E2E skills tests', () => {
       'Description needs at least 3 characters, up to 400 characters!',
     ]);
   });
-  it('Should not be able to update skill if invalid skill', async () => {
+  it('Should not be able to update skill if invalid skill id', async () => {
     const result = await request(app.getHttpServer())
       .patch('/skills/999')
       .set('Authorization', `Bearer ${token}`)
       .send(newSkillChange);
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
     expect(result.body.message).toEqual('Failed to fetch skill with id 999');
   });
   it('Should not be able to update skill if invalid category', async () => {
@@ -224,7 +224,7 @@ describe('E2E skills tests', () => {
       .patch('/skills/1111')
       .set('Authorization', `Bearer ${token}`)
       .send(newSkillInvalidCat);
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(404);
   });
   it('Should not be able to update skill as user', async () => {
     const result = await request(app.getHttpServer())
@@ -244,7 +244,7 @@ describe('E2E skills tests', () => {
     const result = await request(app.getHttpServer())
       .delete('/skills/11150')
       .set('Authorization', `Bearer ${token}`);
-    expect(result.status).toEqual(400);
+    expect(result.status).toEqual(403);
     expect(result.body.message).toEqual(
       `Cannot delete skill of id 11150 with active offers`,
     );

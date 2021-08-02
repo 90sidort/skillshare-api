@@ -14,7 +14,6 @@ import {
   ClassSerializerInterceptor,
   UseInterceptors,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -44,7 +43,7 @@ export class SkillsController {
       const { name, catId, description } = input;
       const category = await this.categoryRepository.findOne(catId);
       if (!category)
-        throw new NotFoundException(`Failed to fetch category with ${catId}`);
+        throw new HttpException(`Failed to fetch category with ${catId}`, 404);
       const skill = new Skill();
       skill.name = name;
       skill.category = category;
@@ -54,7 +53,7 @@ export class SkillsController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create skill`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -83,11 +82,11 @@ export class SkillsController {
     try {
       const skill = await this.skillsService.getSkill(id);
       if (skill) return skill;
-      else throw new NotFoundException(`Failed to find skill of id ${id}`);
+      else throw new HttpException(`Failed to find skill of id ${id}`, 404);
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to get skill with ${id}`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -110,7 +109,7 @@ export class SkillsController {
         category = await this.categoryRepository.findOne(catId);
         if (!category)
           throw new HttpException(
-            `Failed to fetch category with ${catId}`,
+            `Failed to fetch category with id ${catId}`,
             404,
           );
         skill.category = category;
@@ -122,7 +121,7 @@ export class SkillsController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to update skill`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -135,16 +134,17 @@ export class SkillsController {
     try {
       const result = await this.skillsService.deleteSkill(id);
       if (result?.affected !== 1)
-        throw new NotFoundException(`Skill with id ${id} not found!`);
+        throw new HttpException(`Skill with id ${id} not found!`, 404);
       else return true;
     } catch (err) {
       if (err.code === '23503')
-        throw new BadRequestException(
+        throw new HttpException(
           `Cannot delete skill of id ${id} with active offers`,
+          403,
         );
       throw new HttpException(
         err.response ? err.response : `Failed to delete skill with id ${id}`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -47,7 +46,7 @@ export class ReviewController {
     const { title, rating, review, reviewedId } = input;
     try {
       if (user.id === reviewedId)
-        throw new BadRequestException('You cannot review yourself!');
+        throw new HttpException('You cannot review yourself!', 400);
       const author = await this.userRepository.findOne(user.id);
       if (!author)
         throw new HttpException(`User with id: ${user.id} not found!`, 404);
@@ -65,7 +64,7 @@ export class ReviewController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create review`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -77,11 +76,11 @@ export class ReviewController {
     try {
       const review = await this.reviewService.getReviewById(id);
       if (review) return review;
-      throw new NotFoundException(`Failed to find review with id ${id}`);
+      throw new HttpException(`Failed to find review with id ${id}`, 404);
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to fetch reviews`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }

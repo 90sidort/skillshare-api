@@ -7,7 +7,6 @@ import {
   Get,
   HttpCode,
   HttpException,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -57,7 +56,10 @@ export class CategoryController {
     try {
       return await this.categoryService.getCategoriesWithCountOfSkills();
     } catch (err) {
-      throw new HttpException('Failed to get categories', 500);
+      throw new HttpException(
+        err.response ? err.response : 'Failed to get categories',
+        err.status ? err.status : 500,
+      );
     }
   }
 
@@ -68,12 +70,12 @@ export class CategoryController {
     try {
       const category = await this.categoryService.getCategory(id);
       if (!category)
-        throw new NotFoundException(`Category of id: ${id} does not exist`);
+        throw new HttpException(`Category of id: ${id} does not exist`, 404);
       return category;
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to get category of id: ${id}`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -88,12 +90,12 @@ export class CategoryController {
     try {
       const updateQuery = await this.categoryService.updateCategory(id, input);
       if (updateQuery.affected === 0)
-        throw new NotFoundException(`Failed to find category of id ${id}`);
+        throw new HttpException(`Failed to find category of id ${id}`, 404);
       return true;
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to update category of id: ${id}`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -115,7 +117,7 @@ export class CategoryController {
         ]);
       throw new HttpException(
         err.response ? err.response : `Failed to delete category of id: ${id}`,
-        500,
+        err.status ? err.status : 500,
       );
     }
   }
