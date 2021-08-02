@@ -66,7 +66,7 @@ export class ActionController {
         err.response
           ? err.response
           : `Failed to apply for offer of id: ${offerId}`,
-        err.status ? err.status : 404,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -92,21 +92,36 @@ export class ActionController {
       await this.offerRepository.save(offer);
       return offer;
     } catch (err) {
-      throw new HttpException(`Failed to apply for offer`, 403);
+      throw new HttpException(
+        err.response
+          ? err.response
+          : `Failed to deapply for offer of id: ${offerId}`,
+        err.status ? err.status : 500,
+      );
     }
   }
+
   @UseGuards(AuthGuardJwt)
   @Get('/applicants')
   async getApplications(
     @Body() input: { ownerId: number },
     @CurrentUser() userReq: User,
   ) {
-    if (input.ownerId !== userReq.id)
+    try {
+      if (input.ownerId !== userReq.id)
+        throw new HttpException(
+          `User with id: ${userReq.id} is unauthorized!`,
+          404,
+        );
+      return this.offersService.getApplicantsByOwner(input.ownerId);
+    } catch (err) {
       throw new HttpException(
-        `User with id: ${userReq.id} is unauthorized!`,
-        404,
+        err.response
+          ? err.response
+          : `Failed to get applicants for user of id: ${input.ownerId}`,
+        err.status ? err.status : 500,
       );
-    return this.offersService.getApplicantsByOwner(input.ownerId);
+    }
   }
 
   @UseGuards(AuthGuardJwt)
@@ -151,7 +166,10 @@ export class ActionController {
       await this.offerRepository.save(offer);
       return offer;
     } catch (err) {
-      throw new HttpException(`Failed to accept offer`, 403);
+      throw new HttpException(
+        err.response ? err.response : `Failed to accept application`,
+        err.status ? err.status : 500,
+      );
     }
   }
 
@@ -181,7 +199,10 @@ export class ActionController {
       await this.offerRepository.save(offer);
       return offer;
     } catch (err) {
-      throw new HttpException(`Failed to remove from offer`, 403);
+      throw new HttpException(
+        err.response ? err.response : `Failed to remove from offer`,
+        err.status ? err.status : 500,
+      );
     }
   }
 }

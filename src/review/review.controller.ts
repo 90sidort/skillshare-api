@@ -65,7 +65,7 @@ export class ReviewController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create review`,
-        400,
+        500,
       );
     }
   }
@@ -81,7 +81,7 @@ export class ReviewController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to fetch reviews`,
-        400,
+        500,
       );
     }
   }
@@ -106,7 +106,7 @@ export class ReviewController {
         search,
       );
     } catch (err) {
-      throw new HttpException(`Failed to fetch reviews`, 400);
+      throw new HttpException(`Failed to fetch reviews`, 500);
     }
   }
 
@@ -141,7 +141,7 @@ export class ReviewController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to update review`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -172,7 +172,7 @@ export class ReviewController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to delete review`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }

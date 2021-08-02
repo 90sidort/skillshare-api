@@ -46,7 +46,7 @@ export class CategoryController {
         throw new BadRequestException([
           `Category with name ${input.name} already exists`,
         ]);
-      throw new HttpException('Failed to create category', 400);
+      throw new HttpException('Failed to create category', 500);
     }
   }
 
@@ -57,7 +57,7 @@ export class CategoryController {
     try {
       return await this.categoryService.getCategoriesWithCountOfSkills();
     } catch (err) {
-      throw new HttpException('Failed to get categories', 404);
+      throw new HttpException('Failed to get categories', 500);
     }
   }
 
@@ -73,7 +73,7 @@ export class CategoryController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to get category of id: ${id}`,
-        404,
+        500,
       );
     }
   }
@@ -93,7 +93,7 @@ export class CategoryController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to update category of id: ${id}`,
-        404,
+        500,
       );
     }
   }
@@ -115,7 +115,7 @@ export class CategoryController {
         ]);
       throw new HttpException(
         err.response ? err.response : `Failed to delete category of id: ${id}`,
-        404,
+        500,
       );
     }
   }

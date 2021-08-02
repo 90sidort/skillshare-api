@@ -54,7 +54,7 @@ export class SkillsController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create skill`,
-        400,
+        500,
       );
     }
   }
@@ -72,7 +72,7 @@ export class SkillsController {
         search,
       );
     } catch (err) {
-      throw new HttpException(`Failed to fetch skills`, 400);
+      throw new HttpException(`Failed to fetch skills`, 500);
     }
   }
 
@@ -87,7 +87,7 @@ export class SkillsController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to get skill with ${id}`,
-        400,
+        500,
       );
     }
   }
@@ -122,7 +122,7 @@ export class SkillsController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to update skill`,
-        400,
+        500,
       );
     }
   }
@@ -144,7 +144,7 @@ export class SkillsController {
         );
       throw new HttpException(
         err.response ? err.response : `Failed to delete skill with id ${id}`,
-        404,
+        500,
       );
     }
   }

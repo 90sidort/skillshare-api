@@ -61,7 +61,7 @@ export class OfferController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create offer`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -81,7 +81,7 @@ export class OfferController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create offer`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -97,7 +97,7 @@ export class OfferController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create offer`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -145,7 +145,7 @@ export class OfferController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create offer`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
@@ -175,7 +175,7 @@ export class OfferController {
     } catch (err) {
       throw new HttpException(
         err.response ? err.response : `Failed to create offer`,
-        err.status ? err.status : 400,
+        err.status ? err.status : 500,
       );
     }
   }
