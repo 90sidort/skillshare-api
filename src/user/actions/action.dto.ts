@@ -8,4 +8,6 @@ export class ApplyDto {
 export class AnswerApplicationDto extends ApplyDto {
   @IsBoolean()
   accepted: boolean;
+  @IsInt()
+  userId: number;
 }

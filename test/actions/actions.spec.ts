@@ -150,4 +150,144 @@ describe('E2E actions tests', () => {
     expect(result.status).toEqual(404);
     expect(result.body.message).toEqual('Offer with id 997 not found!');
   });
+  it('Should be able to get applicants to your offers', async () => {
+    const result = await request(app.getHttpServer())
+      .get(`/actions/applicants/${111100}`)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toBe(200);
+    expect(result.body[0]).toMatchObject({
+      id: expect.any(Number),
+      title: expect.any(String),
+      description: expect.any(String),
+      applicants: expect.any(Array),
+      applicantCount: expect.any(Number),
+      participantCount: expect.any(Number),
+    });
+  });
+  it('Should not be able to get applicants to other user offers', async () => {
+    const result = await request(app.getHttpServer())
+      .get(`/actions/applicants/${11199}`)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(result.status).toBe(403);
+    expect(result.body.message).toEqual(
+      'User with id: 111100 is unauthorized!',
+    );
+  });
+  it('Should be able to get applicants to offer of given user (admin)', async () => {
+    const result = await request(app.getHttpServer())
+      .get(`/actions/applicants/${111100}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toBe(200);
+    expect(result.body[0]).toMatchObject({
+      id: expect.any(Number),
+      title: expect.any(String),
+      description: expect.any(String),
+      applicants: expect.any(Array),
+      applicantCount: expect.any(Number),
+      participantCount: expect.any(Number),
+    });
+  });
+  it('Should not be able to get applicants to offers of nonexisten user', async () => {
+    const result = await request(app.getHttpServer())
+      .get(`/actions/applicants/${997}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toBe(404);
+    expect(result.body.message).toEqual('User with id: 997 does not exist!');
+  });
+  it('Should be able to accept applicant', async () => {
+    await request(app.getHttpServer())
+      .patch('/actions/apply')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111103 });
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111103, userId: 111101, accepted: true });
+    expect(result.status).toEqual(200);
+    expect(result.body).toMatchObject({
+      id: 111103,
+      title: expect.any(String),
+      description: expect.any(String),
+      available: true,
+      limit: 5,
+      ownerId: 111100,
+      skillId: 11150,
+      status: 1,
+      participants: [
+        {
+          id: 111101,
+          username: 'admin',
+          name: 'Admin',
+          surname: 'Admin',
+          email: 'test@test.com',
+          about: 'Hi! Im your admin.',
+          roles: 'admin',
+          applied: expect.any(Array),
+        },
+      ],
+      applicants: [],
+    });
+  });
+  it('Should be able to reject applicant', async () => {
+    await request(app.getHttpServer())
+      .patch('/actions/apply')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111104 });
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111104, userId: 111101, accepted: false });
+    expect(result.status).toEqual(200);
+    expect(result.body).toMatchObject({
+      id: 111104,
+      title: expect.any(String),
+      description: expect.any(String),
+      available: true,
+      limit: 5,
+      ownerId: 111100,
+      skillId: 11150,
+      status: 1,
+      participants: [],
+      applicants: [],
+    });
+  });
+  it('Should not be able to accept nonexisting applicant', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111104, userId: 997, accepted: true });
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('User with id 997 not found!');
+  });
+  it('Should not be able to accept applicant if user did not apply', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111105, userId: 111100, accepted: true });
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual(
+      'User with id: 111100 did not apply for offer of id: 111105!',
+    );
+  });
+  it('Should not be able to accept applicant for nonexisting offer', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111115, userId: 111100, accepted: true });
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('Offer with id 111115 not found!');
+  });
+
+  it('Should not be able to accept applicant for unavailable offer', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111106, userId: 111100, accepted: true });
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual(
+      'Offer with id 111106 no longer available!',
+    );
+  });
+  // it('Should not be able to accept applicant for offer that reached limit', async () => {});
+  // it('Should not be able to accept applicant for other user', async () => {});
 });

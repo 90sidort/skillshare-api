@@ -4,6 +4,8 @@ import {
   Controller,
   Get,
   HttpException,
+  Param,
+  ParseIntPipe,
   Patch,
   UseGuards,
   UseInterceptors,
@@ -17,6 +19,7 @@ import { OfferService } from './../../offer/offer.service';
 import { AnswerApplicationDto, ApplyDto } from './action.dto';
 import { AuthGuardJwt } from '../authentication/guard';
 import { CurrentUser } from '../authentication/currentUser.decorator';
+import { Role } from '../authorization/role.enum';
 
 @Controller('/actions')
 export class ActionController {
@@ -102,46 +105,58 @@ export class ActionController {
   }
 
   @UseGuards(AuthGuardJwt)
-  @Get('/applicants')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('/applicants/:id')
   async getApplications(
-    @Body() input: { ownerId: number },
+    @Param('id', ParseIntPipe) id: number,
     @CurrentUser() userReq: User,
   ) {
     try {
-      if (input.ownerId !== userReq.id)
+      if (id !== userReq.id && !userReq.roles.includes(Role.Admin))
         throw new HttpException(
           `User with id: ${userReq.id} is unauthorized!`,
-          404,
+          403,
         );
-      return this.offersService.getApplicantsByOwner(input.ownerId);
+      const applicants = await this.offersService.getApplicantsByOwner(id);
+      if (applicants.length === 0)
+        throw new HttpException(`User with id: ${id} does not exist!`, 404);
+      return applicants;
     } catch (err) {
       throw new HttpException(
         err.response
           ? err.response
-          : `Failed to get applicants for user of id: ${input.ownerId}`,
+          : `Failed to get applicants for user of id: ${id}`,
         err.status ? err.status : 500,
       );
     }
   }
 
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Patch('/answer')
-  async accept(
+  async answer(
     @Body() input: AnswerApplicationDto,
     @CurrentUser() userReq: User,
   ) {
-    const { offerId, accepted } = input;
+    const { offerId, userId, accepted } = input;
     try {
-      const user = await this.userRepository.findOne(userReq.id, {
-        relations: ['applied', 'participates'],
+      const user = await this.userRepository.findOne(userId, {
+        relations: ['applied'],
       });
       if (!user)
-        throw new HttpException(`User with id ${userReq.id} not found!`, 404);
+        throw new HttpException(`User with id ${userId} not found!`, 404);
       const offer = await this.offerRepository.findOne(offerId, {
         relations: ['participants', 'applicants'],
       });
       if (!offer)
         throw new HttpException(`Offer with id ${offerId} not found!`, 404);
+      let appliedIds = [];
+      user.applied.forEach((application) => appliedIds.push(application.id));
+      if (!appliedIds.includes(offer.id))
+        throw new HttpException(
+          `User with id: ${userId} did not apply for offer of id: ${offer.id}!`,
+          400,
+        );
       if (offer.ownerId !== userReq.id)
         throw new HttpException(
           `User with id: ${userReq.id} is unauthorized!`,
@@ -161,7 +176,7 @@ export class ActionController {
         offer.participants.push(user);
       }
       offer.applicants = offer.applicants.filter(
-        (applicant) => applicant.id !== userReq.id,
+        (applicant) => applicant.id !== user.id,
       );
       await this.offerRepository.save(offer);
       return offer;
