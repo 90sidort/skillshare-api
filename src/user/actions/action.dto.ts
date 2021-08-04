@@ -5,6 +5,13 @@ export class ApplyDto {
   offerId: number;
 }
 
+export class RemoveDto {
+  @IsInt()
+  offerId: number;
+  @IsInt()
+  userId: number;
+}
+
 export class AnswerApplicationDto extends ApplyDto {
   @IsBoolean()
   accepted: boolean;

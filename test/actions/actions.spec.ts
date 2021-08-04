@@ -30,6 +30,7 @@ describe('E2E actions tests', () => {
     await loadFixture(connection, '_user_.sql');
     await loadFixture(connection, '_offer_.sql');
     await loadFixture(connection, '_offer_applicants_user_.sql');
+    await loadFixture(connection, '_offer_participants_user_.sql');
     token = getToken(
       {
         id: 111101,
@@ -99,6 +100,16 @@ describe('E2E actions tests', () => {
       .send({ offerId: 111101 });
     expect(result.status).toEqual(400);
     expect(result.body.message).toEqual("Can't apply for your own offer");
+  });
+  it('Should not be able to apply for offer once again', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/apply')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111106 });
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual(
+      'You have already applied for offer of id 111106',
+    );
   });
   it('Should not be able to apply for nonexisting offer', async () => {
     const result = await request(app.getHttpServer())
@@ -288,6 +299,66 @@ describe('E2E actions tests', () => {
       'Offer with id 111106 no longer available!',
     );
   });
-  // it('Should not be able to accept applicant for offer that reached limit', async () => {});
-  // it('Should not be able to accept applicant for other user', async () => {});
+  it('Should not be able to accept applicant for offer that reached limit', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111107, userId: 111100, accepted: true });
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual(
+      'Offer of id 111107 has already reached max limit of 1!',
+    );
+  });
+  it('Should not be able to accept applicant for other user', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/answer')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 11129, userId: 11144, accepted: true });
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toBe('User with id: 111100 is unauthorized!');
+  });
+  it('Should be albe to remove participant as user', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/remove')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ offerId: 111108, userId: 11142 });
+    expect(result.status).toEqual(200);
+    result.body.participants.forEach((participant) => {
+      expect(participant.id).not.toEqual(11142);
+    });
+  });
+  it('Should not be albe to remove participant from other user offer as user', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/remove')
+      .set('Authorization', `Bearer ${limitToken}`)
+      .send({ offerId: 111108, userId: 11140 });
+    expect(result.status).toEqual(403);
+    expect(result.body.message).toEqual('User with id: 11144 is unauthorized!');
+  });
+  it('Should be albe to remove participant as admin', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/remove')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111108, userId: 11140 });
+    expect(result.status).toEqual(200);
+    result.body.participants.forEach((participant) => {
+      expect(participant.id).not.toEqual(11140);
+    });
+  });
+  it('Should return error if offer does not exist', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/remove')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111188, userId: 11140 });
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('Offer with id 111188 not found!');
+  });
+  it('Should return error if user does not exist', async () => {
+    const result = await request(app.getHttpServer())
+      .patch('/actions/remove')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ offerId: 111108, userId: 997 });
+    expect(result.status).toEqual(404);
+    expect(result.body.message).toEqual('User with id 997 not found!');
+  });
 });
