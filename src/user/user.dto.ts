@@ -37,7 +37,7 @@ export class SignupDto {
   retype: string;
   @IsEmail()
   email: string;
-  @Length(3, 300, {
+  @Length(3, 2000, {
     message: 'About cannot be shorter than 3 characters and longer than 2000!',
   })
   about: string;
