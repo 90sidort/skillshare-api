@@ -65,12 +65,12 @@ export class UsersController {
   async create(@Body() input: SignupDto) {
     try {
       if (input.password !== input.retype)
-        throw new BadRequestException(['Passwords do not match!']);
+        throw new HttpException('Passwords do not match!', 400);
       const exists = await this.userRepository.findOne({
         where: [{ username: input.username }, { email: input.email }],
       });
       if (exists)
-        throw new BadRequestException(['Username or email already taken!']);
+        throw new HttpException('Username or email already taken!', 400);
       const user = new User();
       user.username = input.username;
       user.name = input.name;

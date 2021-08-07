@@ -30,5 +30,5 @@ export const signupUserInvalid = {
   password: 'te',
   retype: 'te',
   email: 'test',
-  about: 'Dis is a short test. So lets check if it works!'.repeat(8),
+  about: 'Dis is a short test. So lets check if it works!'.repeat(50),
 };

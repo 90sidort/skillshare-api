@@ -131,21 +131,21 @@ describe('E2E user tests', () => {
     const result = await request(app.getHttpServer())
       .post('/users/signup')
       .send({ ...signupUser, retype: 'else' });
-    expect(result.body.message).toEqual(['Passwords do not match!']);
+    expect(result.body.message).toEqual('Passwords do not match!');
     expect(result.status).toEqual(400);
   });
   it('Should not be able to signup with already existing email', async () => {
     const result = await request(app.getHttpServer())
       .post('/users/signup')
       .send({ ...signupUser, email: 'test@test.com' });
-    expect(result.body.message).toEqual(['Username or email already taken!']);
+    expect(result.body.message).toEqual('Username or email already taken!');
     expect(result.status).toEqual(400);
   });
   it('Should not be able to signup with already existing username', async () => {
     const result = await request(app.getHttpServer())
       .post('/users/signup')
       .send({ ...signupUser, username: 'admin' });
-    expect(result.body.message).toEqual(['Username or email already taken!']);
+    expect(result.body.message).toEqual('Username or email already taken!');
     expect(result.status).toEqual(400);
   });
   it('Should not be able to signup without mandatory data', async () => {
