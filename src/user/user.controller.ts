@@ -51,6 +51,7 @@ export class UsersController {
       return {
         userId: user.id,
         token: this.userService.getTokenForUser(user),
+        admin: user.roles.includes(Role.Admin) ? true : false,
       };
     } catch (err) {
       throw new HttpException(
