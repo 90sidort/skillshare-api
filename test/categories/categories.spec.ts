@@ -70,9 +70,9 @@ describe('E2E categories tests', () => {
       .set('Authorization', `Bearer ${token}`)
       .send(newCategory);
     expect(fail.status).toEqual(400);
-    expect(fail.body.message).toEqual([
+    expect(fail.body.message).toEqual(
       'Category with name New Category already exists',
-    ]);
+    );
   });
   it('Should not be able to create category without mandatory data', async () => {
     const result = await request(app.getHttpServer())

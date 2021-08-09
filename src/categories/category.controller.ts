@@ -42,9 +42,10 @@ export class CategoryController {
       return category;
     } catch (err) {
       if (err.code === '23505')
-        throw new BadRequestException([
+        throw new HttpException(
           `Category with name ${input.name} already exists`,
-        ]);
+          400,
+        );
       throw new HttpException('Failed to create category', 500);
     }
   }
