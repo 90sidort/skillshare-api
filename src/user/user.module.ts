@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { User } from './user.entity';
 import { UsersController } from './user.controller';
+import { ImageController } from './image.controller';
 import { UserService } from './user.service';
 import { JwtStrategy } from './authentication/jwt.strategy';
 import { LocalStrategy } from './authentication/local.strategy';
@@ -22,6 +23,6 @@ import { OfferService } from './../offer/offer.service';
     }),
   ],
   providers: [UserService, JwtStrategy, LocalStrategy, OfferService],
-  controllers: [UsersController, ActionController],
+  controllers: [UsersController, ActionController, ImageController],
 })
 export class UserModule {}

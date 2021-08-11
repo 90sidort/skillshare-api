@@ -35,6 +35,11 @@ export class SignupDto {
       'Password cannot be shorter than 3 characters and longer than 100!',
   })
   retype: string;
+  @Length(0, 300, {
+    message:
+      'Imagepath cannot be shorter than 3 characters and longer than 100!',
+  })
+  imagepath: string;
   @IsEmail()
   email: string;
   @Length(3, 2000, {

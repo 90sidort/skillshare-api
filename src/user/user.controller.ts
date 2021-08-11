@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -16,6 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { SignupDto, UpdateUserDto, userSignin } from './user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';

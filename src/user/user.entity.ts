@@ -52,6 +52,12 @@ export class User {
   updatedAt: Date;
   @Column('enum', { enum: [Role.Admin, Role.User], default: [Role.User] })
   roles: Role[];
+  @Column({
+    name: 'imagepath',
+    nullable: false,
+    default: 'cheems_user2021-08-11T14:04:50.726Z.jpg',
+  })
+  imagepath: string;
   appliedCount: number;
   participatesCount: number;
   offeredCounts: number;
