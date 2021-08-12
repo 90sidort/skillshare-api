@@ -158,12 +158,13 @@ describe('E2E user tests', () => {
       'Surname cannot be shorter than 3 characters and longer than 300!',
       'Password cannot be shorter than 3 characters and longer than 300!',
       'Password cannot be shorter than 3 characters and longer than 100!',
+      'Imagepath cannot be shorter than 3 characters and longer than 100!',
       'email must be an email',
       'About cannot be shorter than 3 characters and longer than 2000!',
     ]);
     expect(result.status).toEqual(400);
   });
-  it('Should not be able to signup without invalid data', async () => {
+  it('Should not be able to signup with invalid data', async () => {
     const result = await request(app.getHttpServer())
       .post('/users/signup')
       .send(signupUserInvalid);
@@ -173,6 +174,7 @@ describe('E2E user tests', () => {
       'Surname cannot be shorter than 3 characters and longer than 300!',
       'Password cannot be shorter than 3 characters and longer than 300!',
       'Password cannot be shorter than 3 characters and longer than 100!',
+      'Imagepath cannot be shorter than 3 characters and longer than 100!',
       'email must be an email',
       'About cannot be shorter than 3 characters and longer than 2000!',
     ]);

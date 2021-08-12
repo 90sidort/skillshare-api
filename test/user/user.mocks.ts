@@ -11,6 +11,7 @@ export const signupUser = {
   retype: 'testowehaslo',
   email: 'test@email.com',
   about: 'Dis is a short test. So lets check if it works!',
+  imagepath: 'cheems_user2021-08-11T14:04:50.726Z.jpg',
 };
 
 export const updateUser = {
